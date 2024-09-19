@@ -3,6 +3,9 @@ This is my first modern web app (ever) and I'm using it to help me learn how to 
 
 I'm keeping the scope small for now, at least to make this manageable. We'll see where this ends up going.
 
+# Documentation
+I gathered some notes on how I installed this over in the [docs](docs.md) file.
+
 # Front End
 Frontend - Vue and Vuetify
 

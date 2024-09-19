@@ -1,0 +1,8 @@
+FastAPI
+fastapi[standard]
+pytest
+sqlalchemy
+sqlalchemy.orm
+pydantic
+uvicorn
+pytest-env
