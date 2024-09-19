@@ -5,7 +5,7 @@ Line by line from my terminal, this is how I built this project.
 
 # Frontend
 
-The frontend of this code was initialized via `pnpm create vuetify` which scaffolded a base Vue/Vuetify project for me.
+The frontend of this code was initialized via `pnpm create vuetify` which scaffolded a base Vue/Vuetify project for me after I answered some questions.
 
 ```
 aaron@Aarons-MacBook-Pro rack-root % pnpm create vuetify
