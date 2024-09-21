@@ -63,14 +63,14 @@ Github: https://github.com/vuetifyjs/vuetify
 Support Vuetify: https://github.com/sponsors/johnleider
 ```
 
-To run this, I then ran:
+To start the front end, I run:
 
 ```
 cd frontend
 npm run dev
 ```
 
-And we're up! The Vue app is now running on https://localhost:3000.
+And we're up! The Vue app is now running on https://localhost:3000. Check it out ;)
 
 # venv
 
@@ -87,9 +87,9 @@ pip3 install -r requirements.txt
 The backend for this app will be powered by FastAPI. Essential packages will be installed via requirements.txt.
 
 ## Testing
-I'm using pytest to run the tests for the backend which should allow me to develop more quickly later. My intention is that for every API endpoint, I have a test of some kind that will cover that code.
+I'm using pytest to run the tests for the backend which should allow me to develop more quickly later. My intention is that for every API endpoint, I have a test of some kind that will cover that code. Code coverage might get to 100%, but we'll see.
 
-In my `pytest.ini` file, I have one directive and that's to set an environmental variable for the databse file name. Since I'm only using a local sqlite database file for this app, I set the environment variable `DATABASE_URL` to be `nonproduction.db` for testing. When I am running via pytest, drop every piece of data to 'reset' the database without totally deleting and recreating it.
+In my `pytest.ini` file, I have one directive and that's to set an environmental variable for the databse file name. Since I'm only using a local sqlite database file for this app, I set the environment variable `DATABASE_URL` to be `nonproduction.db` for testing. When I am running via pytest, I drop every piece of data to 'reset' the database without totally deleting and recreating it.
 
 I came about this solution since I can use calls like `os.getenv("DATABASE_URL", "sqlite:///./backend/production.db")` in order to find out what database file I'm using.
 
