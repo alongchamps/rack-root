@@ -6,10 +6,19 @@ The goal for Rack Root is two fold - one side is teaching myself about web devel
 
 This app should be portable enough to run in a single docker container and I might add features to that layer at some point in the future. Notably, persistence of the data is in a local sqlite database file in the `/backend` directory.
 
-# Relationships between records
+# Data and relationships
+
+Every item in the inventory has an id, name, and type. All the other fields are optional.
+
+The types database will be pre-seeded with a number of options and more types can be added in the Settings page.
+
+Relationship examples:
+
 An inventory item can have 0..n IP addresses.
+
 An IPAM network can have 0..n IP addresses.
-A DHCP range has a starting IP and ending IP.
+
+A DHCP range has a starting IP, ending IP, and associated network.
 
 # Database table design
 
