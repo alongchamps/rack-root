@@ -5,56 +5,35 @@ Line by line from my terminal, this is how I built this project.
 
 # Frontend
 
-The frontend of this code was initialized via `pnpm create vuetify` which scaffolded a base Vue/Vuetify project for me after I answered some questions.
+The frontend of this code was initialized via `npm create vuetify@latest` which scaffolded a base Vue/Vuetify project for me after I answered some questions.
+
+The first time I created this, I think I forgot to install the Recommended preset, and only did the Default one. As a side effect, my server had issues serving up `.vue` files. Therefore, I reinitialized the project with the output you can now see below:
 
 ```
-aaron@Aarons-MacBook-Pro rack-root % pnpm create vuetify
-.../192080151c3-13640                    |   +9 +
-.../192080151c3-13640                    | Progress: resolved 9, reused 0, downloaded 9, added 9, done
+aaron@Aarons-MacBook-Pro rack-root % npm create vuetify@latest
+
+> npx
+> create-vuetify
+
 
 Vuetify.js - Material Component Framework for Vue
 
 ✔ Project name: … frontend
-✔ Which preset would you like to install? › Default (Adds routing, ESLint & SASS variables)
-✔ Use TypeScript? … No
-✔ Would you like to install dependencies with yarn, npm, pnpm, or bun? › pnpm
-✔ Install Dependencies? … Yes
+✔ Which preset would you like to install? › Recommended (Everything from Default. Adds auto importing, layouts & pinia)
+✔ Use TypeScript? … No / Yes
+✔ Would you like to install dependencies with yarn, npm, pnpm, or bun? › npm
+✔ Install Dependencies? … No / Yes
 
 ◌ Generating scaffold...
-◌ Installing dependencies with pnpm...
+◌ Installing dependencies with npm...
 
- WARN  5 deprecated subdependencies found: @humanwhocodes/config-array@0.13.0, @humanwhocodes/object-schema@2.0.3, glob@7.2.3, inflight@1.0.6, rimraf@3.0.2
-Packages: +294
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-Progress: resolved 331, reused 3, downloaded 291, added 294, done
-node_modules/.pnpm/core-js@3.38.1/node_modules/core-js: Running postinstall script, done in 42ms
-node_modules/.pnpm/esbuild@0.21.5/node_modules/esbuild: Running postinstall script, done in 294ms
 
-dependencies:
-+ @mdi/font 7.4.47
-+ core-js 3.38.1
-+ roboto-fontface 0.10.0
-+ vue 3.5.6
-+ vuetify 3.7.2
+added 336 packages, and audited 337 packages in 16s
 
-devDependencies:
-+ @vitejs/plugin-vue 5.1.4
-+ eslint 8.57.1 (9.10.0 is available)
-+ eslint-config-standard 17.1.0
-+ eslint-plugin-import 2.30.0
-+ eslint-plugin-n 16.6.2 (17.10.3 is available)
-+ eslint-plugin-node 11.1.0
-+ eslint-plugin-promise 6.6.0 (7.1.0 is available)
-+ eslint-plugin-vue 9.28.0
-+ sass 1.77.6 (1.79.1 is available)
-+ unplugin-fonts 1.1.1
-+ unplugin-vue-components 0.27.4
-+ unplugin-vue-router 0.10.8
-+ vite 5.4.6
-+ vite-plugin-vuetify 2.0.4
-+ vue-router 4.4.5
+118 packages are looking for funding
+  run `npm fund` for details
 
-Done in 7s
+found 0 vulnerabilities
 
 frontend has been generated at /Users/aaron/github/rack-root/frontend
 

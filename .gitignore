@@ -1,1 +1,4 @@
 /venv-rr/**
+backend/production.db
+backend/nonproduction.db
+notes.txt

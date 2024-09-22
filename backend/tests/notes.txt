@@ -9,3 +9,17 @@ curl -X POST --json '{ "name": "item7",  "description": "description7"}' http://
 curl -X POST --json '{ "name": "item8",  "description": "description8"}' http://localhost:8000/items/
 curl -X POST --json '{ "name": "item9",  "description": "description9"}' http://localhost:8000/items/
 curl -X POST --json '{ "name": "item0",  "description": "description0"}' http://localhost:8000/items/
+
+
+
+
+curl -X POST --json '{
+"name" : "name", 
+"description" : "description", 
+"itemType" : 5, 
+"serialNumber" : "serialNumber", 
+"purchaseDate" : "1970-01-01", 
+"warrantyExpiration" : "1971-01-01", 
+"operatingSystem" : "operatingSystem", 
+"notes" : "notes"
+}' http://localhost:8000/items

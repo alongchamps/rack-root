@@ -1,4 +1,3 @@
-
 /**
  * router/index.ts
  *
@@ -7,11 +6,34 @@
 
 // Composables
 import { createRouter, createWebHistory } from 'vue-router/auto'
+import { setupLayouts } from 'virtual:generated-layouts'
 import { routes } from 'vue-router/auto-routes'
+
+// Aaron's imports
+import index from '../pages/index.vue'
+
+import itemsIndex from '../pages/AllItems.vue'
+import itemId from '../pages/items/item.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
-  routes,
+  routes: [
+    {
+        path: '/',
+        name: 'Index',
+        component: index
+    },
+    {
+        path: '/items',
+        name: 'AllItems',
+        component: itemsIndex
+    },
+    {
+        path: '/items/:id(\\d+)',
+        name: 'SingleItem',
+        component: itemId
+    }
+  ]
 })
 
 // Workaround for https://github.com/vitejs/vite/issues/11804
