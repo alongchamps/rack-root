@@ -9,9 +9,38 @@ import { createRouter, createWebHistory } from 'vue-router/auto'
 import { setupLayouts } from 'virtual:generated-layouts'
 import { routes } from 'vue-router/auto-routes'
 
+// core/utility pages
+import index from '../pages/index.vue'
+import fourohfour from '../pages/404.vue'
+
+// pages relating to inventory items
+import allItems from '../pages/items/AllItems.vue'
+import singleItem from '../pages/items/SingleItem.vue'
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
-  routes: setupLayouts(routes),
+  routes: [
+    {
+      path: '/',
+      name: 'Index',
+      component: index
+    },
+    {
+      path: '/item',
+      name: 'AllItems',
+      component: allItems
+    },
+    {
+      path: '/item/:id(\\d+)',
+      name: 'SingleItem',
+      component: singleItem
+    },
+    {
+      path: '/:path*',
+      name: 'FourOhFour',
+      component: fourohfour
+    }
+  ]
 })
 
 // Workaround for https://github.com/vitejs/vite/issues/11804

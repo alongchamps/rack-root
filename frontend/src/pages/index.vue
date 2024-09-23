@@ -1,5 +1,6 @@
 <template>
-  <h1>Welcome to Rack Root</h1>
+  <navigation />
+  <h1>Welcome to Rack Root with new route</h1>
 </template>
 
 <script setup>
