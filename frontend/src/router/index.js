@@ -26,12 +26,12 @@ const router = createRouter({
       component: index
     },
     {
-      path: '/item',
+      path: '/items',
       name: 'AllItems',
       component: allItems
     },
     {
-      path: '/item/:id(\\d+)',
+      path: '/items/:id(\\d+)',
       name: 'SingleItem',
       component: singleItem
     },

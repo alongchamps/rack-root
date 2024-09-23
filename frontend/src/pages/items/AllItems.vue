@@ -34,6 +34,6 @@
 
 <template>
     <navigation />
-    <h1>Welcome to all items page</h1>
+    <h1>Welcome to the all items page</h1>
     <v-data-table :items="items" :headers="headers" item-key="id" @click:row=goToItem></v-data-table>
 </template>

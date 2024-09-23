@@ -6,13 +6,15 @@ I'm keeping the scope small for now, at least to make this manageable. We'll see
 # Documentation
 I gathered some notes on how I initialized this project over in the [docs](docs.md) file.
 
+I also started to put together a [design document](design.md) to help me stay on track.
+
 # Front End
-Frontend - Vue and Vuetify
+Frontend - Vue and Vuetify with package management from npm.
 
 # Back End
-Backend - FastAPI project with testing for all REST endpoints
+Backend - FastAPI project with testing for all REST endpoints.
 
-Database - local SQLite file
+Database - local SQLite file.
 
 # Features
 * Track the inventory and relationships of hardware/VMs in your home lab. Everything from racks to servers to NAS devices to the hard drives inside are intended to be in scope. Of course, that's not a complete list of object types.
