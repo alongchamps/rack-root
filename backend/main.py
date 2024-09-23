@@ -11,7 +11,7 @@ app = FastAPI()
 router = APIRouter()
 router.add_api_route("/items/", read_all_items, methods=['GET'], response_model=list[ItemResponse])
 router.add_api_route("/items/{item_id:int}", read_item, methods=['GET'], response_model=ItemResponse)
-router.add_api_route("/items", create_item, methods=['POST'], response_model=ItemResponse, status_code=status.HTTP_201_CREATED)
+router.add_api_route("/items/", create_item, methods=['POST'], response_model=ItemResponse, status_code=status.HTTP_201_CREATED)
 
 app.include_router(router)
 
