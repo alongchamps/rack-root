@@ -23,3 +23,6 @@ curl -X POST --json '{
 "operatingSystem" : "operatingSystem", 
 "notes" : "notes"
 }' http://localhost:8000/items
+
+
+curl -X POST --json '{ "name": "Device Type 1"}' http://localhost:8000/deviceTypes/

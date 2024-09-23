@@ -16,6 +16,7 @@ engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = sqlalchemy.orm.declarative_base()
 
+## Item classes
 # Database model
 class Item(Base):
     __tablename__ = "items"
@@ -62,6 +63,22 @@ class ItemResponse(BaseModel):
     warrantyExpiration: date
     operatingSystem: str
     notes: str
+
+## Device Type classes
+# Base model for device types in the database
+class DeviceType(Base):
+    __tablename__ = "deviceTypes"
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, index=True)
+
+# Pydantic model for returning device types
+class DeviceTypeResponse(BaseModel):
+    id: int
+    name: str
+
+# Pydantic model for updating device types
+class DeviceTypeCreate(BaseModel):
+    name: str
 
 # When the nonproduction test database is in use, drop everything to effectively reset it
 if( DATABASE_URL.find("nonproduction.db", 0) > -1 ):

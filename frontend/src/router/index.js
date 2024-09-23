@@ -12,6 +12,7 @@ import { routes } from 'vue-router/auto-routes'
 // core/utility pages
 import index from '../pages/index.vue'
 import fourohfour from '../pages/404.vue'
+import settings from '../pages/Settings.vue'
 
 // pages relating to inventory items
 import allItems from '../pages/items/AllItems.vue'
@@ -34,6 +35,11 @@ const router = createRouter({
       path: '/items/:id(\\d+)',
       name: 'SingleItem',
       component: singleItem
+    },
+    {
+      path: '/settings',
+      name: 'Settings',
+      component: settings
     },
     {
       path: '/:path*',
