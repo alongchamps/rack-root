@@ -1,4 +1,4 @@
-# invocation: pytest --import-mode prepend -c ./backend/tests/pytest.ini -v
+
 
 from fastapi.testclient import TestClient
 from backend.main import app

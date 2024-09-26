@@ -1,3 +1,7 @@
+invocation for testing:
+pytest --import-mode prepend -c ./backend/tests/pytest.ini -v
+
+
 # Sample data
 curl -X POST --json '{ "name": "item1",  "description": "description1"}' http://localhost:8000/items/
 curl -X POST --json '{ "name": "item2",  "description": "description2"}' http://localhost:8000/items/

@@ -76,9 +76,13 @@ class DeviceTypeResponse(BaseModel):
     id: int
     name: str
 
-# Pydantic model for updating device types
+# Pydantic model for creating device types
 class DeviceTypeCreate(BaseModel):
     name: str
+
+# Pydantic model for updating a device
+class DeviceTypeUpdate(BaseModel):
+    name: Optional[str] = None
 
 # When the nonproduction test database is in use, drop everything to effectively reset it
 if( DATABASE_URL.find("nonproduction.db", 0) > -1 ):
