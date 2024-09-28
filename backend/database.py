@@ -16,21 +16,6 @@ engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = sqlalchemy.orm.declarative_base()
 
-# Example pydantic models:
-
-# class Team(SQLModel, table=True):
-#     id: int | None = Field(default=None, primary_key=True)
-#     name: str = Field(index=True)
-
-#     heroes: list["Hero"] = Relationship(back_populates="team")
-
-# class Hero(SQLModel, table=True):
-#     id: int | None = Field(default=None, primary_key=True)
-#     name: str = Field(index=True)
-
-#     team_id: int | None = Field(default=None, foreign_key="team.id")
-#     team: Team | None = Relationship(back_populates="heroes")
-
 ## Item classes
 # Database model
 class Item(Base):
