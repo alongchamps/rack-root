@@ -1,5 +1,6 @@
 from fastapi import Depends, HTTPException, Request
 from sqlalchemy.orm import Session
+from typing import Optional
 from .database import get_db, DeviceType, DeviceTypeCreate, DeviceTypeUpdate
 
 # reading
@@ -13,6 +14,15 @@ def read_device_type(dev_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="A device with that ID was not found")
 
     return db_item
+
+def get_valid_device_id( deviceTypeId: Optional[int] = None, db: Session = Depends(get_db) ) -> int:
+    if deviceTypeId is None:
+        raise HTTPException(status_code=400, detail="Device type ID is required")
+    
+    deviceType = db.query(DeviceType).filter(DeviceType.id == deviceTypeId).first()
+    if deviceType is None:
+        raise HTTPException(status_code=400, detail="Invalid device ID")
+    return deviceTypeId
 
 # creating
 def create_device_type(deviceType: DeviceTypeCreate, db: Session = Depends(get_db)):
