@@ -26,3 +26,11 @@ def testGetUpdatedDevice():
     response = client.get("/deviceTypes/1")
     assert response.status_code == 200
     assert response.content.find(b"newTestDeviceName") > 0
+
+def testDeleteDevice():
+    response = client.delete("/deviceTypes/1")
+    assert response.status_code == 200
+
+def testDelete404():
+    response = client.delete("/deviceTypes/1")
+    assert response.status_code == 404

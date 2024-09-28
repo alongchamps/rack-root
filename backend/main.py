@@ -8,7 +8,7 @@ from .item import read_all_items, read_item, create_item
 
 # imports for device type 
 from .database import DeviceTypeResponse
-from .deviceType import read_all_device_types, read_device_type, create_device_type, update_device_type
+from .deviceType import read_all_device_types, read_device_type, create_device_type, update_device_type, delete_device_type
 
 # FastAPI app instance
 app = FastAPI()
@@ -42,6 +42,9 @@ router.add_api_route("/deviceTypes/", create_device_type, methods=['POST'], resp
 
 # HTTP PUT update single device type
 router.add_api_route("/deviceTypes/{dev_id:int}", update_device_type, methods=['PUT'], status_code=status.HTTP_202_ACCEPTED)
+
+# HTTP DELETE single device type
+router.add_api_route("/deviceTypes/{dev_id:int}", delete_device_type, methods=['DELETE'] )
 
 app.include_router(router)
 

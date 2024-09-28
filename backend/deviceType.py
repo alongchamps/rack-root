@@ -14,6 +14,7 @@ def read_device_type(dev_id: int, db: Session = Depends(get_db)):
 
     return db_item
 
+# creating
 def create_device_type(deviceType: DeviceTypeCreate, db: Session = Depends(get_db)):
     db_item = DeviceType(**deviceType.model_dump())
     db.add(db_item)
@@ -28,4 +29,11 @@ def update_device_type(dev_id: int, devUpdate: DeviceTypeUpdate, db: Session = D
     return itemsAffected
 
 ## Deleting
-# todo
+def delete_device_type(dev_id: int, db: Session = Depends(get_db)):
+    db_delete = db.query(DeviceType).filter(DeviceType.id == dev_id).delete(synchronize_session="auto")
+    db.commit()
+
+    if db_delete == 0:
+        raise HTTPException(status_code=404, detail="A device with that ID was not found")
+
+    return 0
