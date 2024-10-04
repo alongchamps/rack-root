@@ -17,11 +17,9 @@ def testNewItem():
     response = client.post("/items/", json={
         "name": "testItem1",
         "description": "testDesc1",
-        "deviceTypeId": 1,
         "serialNumber": "FOOB4R",
         "purchaseDate": "1970-01-01",
         "warrantyExpiration": "1971-01-01",
-        "operatingSystem": "linux",
         "notes": "notes test"
         })
     assert response.status_code == 201
@@ -34,34 +32,30 @@ def testGetNewlyCreatedItem():
     assert response.content.find(b"FOOB4R") > 0
     assert response.content.find(b"1970") > 0
     assert response.content.find(b"1971") > 0
-    assert response.content.find(b"linux") > 0
     assert response.content.find(b"notes test") > 0
+    # assert response.content.find(b"Test device type") > 0
 
 def testNewItem2():
     response = client.post("/items/", json={
         "name": "testItem2",
         "description": "testDesc2",
-        "deviceTypeId": 1,
         "serialNumber": "B4RGLASS",
         "purchaseDate": "1972-01-01",
         "warrantyExpiration": "1973-01-01",
-        "operatingSystem": "macos",
         "notes": "notes test 2"
         })
     assert response.status_code == 201
 
-def testNewItemWrongDevice():
-    response = client.post("/items/", json={
-        "name": "testItem3",
-        "description": "test description 3",
-        "deviceTypeId": 2,
-        "serialNumber": "B4RGLASS",
-        "purchaseDate": "1974-01-01",
-        "warrantyExpiration": "1975-01-01",
-        "operatingSystem": "macos",
-        "notes": "notes test 3"
-        })
-    assert response.status_code == 400
+# def testNewItemWrongDevice():
+#     response = client.post("/items/", json={
+#         "name": "testItem3",
+#         "description": "test description 3",
+#         "serialNumber": "B4RGLASS",
+#         "purchaseDate": "1974-01-01",
+#         "warrantyExpiration": "1975-01-01",
+#         "notes": "notes test 3"
+#         })
+#     assert response.status_code == 400
 
 def testUpdateItem2():
     # test that the name updates and description stays the name

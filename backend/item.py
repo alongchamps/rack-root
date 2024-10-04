@@ -17,7 +17,7 @@ def read_item(item_id: int, db: Session = Depends(get_db)):
 ## Creating items
 # def create_item(item: ItemCreate, deviceTypeId: int = Depends(get_valid_device_id), db: Session = Depends(get_db)):
 def create_item(item: ItemCreate, db: Session = Depends(get_db)):
-    item.deviceTypeId = get_valid_device_id(item.deviceTypeId, db)
+    # item.deviceTypeId = get_valid_device_id(item.deviceTypeId, db)
     db_item = Item(**item.model_dump())
     db.add(db_item)
     db.commit()

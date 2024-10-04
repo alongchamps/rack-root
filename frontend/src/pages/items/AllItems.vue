@@ -6,13 +6,13 @@
         headers: [
           { title: 'ID', value: 'id' },
           { title: 'Name', value: 'name' },
-          { title: 'description', value: 'description' },
-          { title: 'itemType', value: 'itemType' },
-          { title: 'serialNumber', value: 'serialNumber' },
-          { title: 'purchaseDate', value: 'purchaseDate' },
-          { title: 'warrantyExpiration', value: 'warrantyExpiration' },
-          { title: 'operatingSystem', value: 'operatingSystem' },
-          { title: 'notes', value: 'notes' }
+          { title: 'Description', value: 'description' },
+          // { title: 'Device Type', value: 'deviceTypeId' },
+          // { title: 'Device Type Name', value: 'deviceType' },
+          { title: 'Serial Number', value: 'serialNumber' },
+          { title: 'Purchase Date', value: 'purchaseDate' },
+          { title: 'Warranty Expiration', value: 'warrantyExpiration' },
+          { title: 'Notes', value: 'notes' }
         ]
       }
     },
@@ -24,6 +24,10 @@
       },
       async goToItem(click, row) {
         this.$router.push('/item/' + row.item.id)
+      },
+      async getDeviceTypeName( id ) {
+        const res = await fetch("http://localhost:8000/deviceTypes/" + id );
+        
       }
     },
     mounted() {
@@ -34,6 +38,7 @@
 
 <template>
     <navigation />
-    <h1>Welcome to the all items page</h1>
-    <v-data-table :items="items" :headers="headers" item-key="id" @click:row=goToItem></v-data-table>
+    <v-data-table :items="items" :headers="headers" item-key="id" @click:row=goToItem>
+    </v-data-table>
+    <v-btn class="ma-6" prepend-icon="mdi-plus" color="green" :to="{ name: 'NewItem' }">New Item</v-btn>
 </template>
