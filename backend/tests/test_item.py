@@ -17,6 +17,7 @@ def testNewItem():
     response = client.post("/items/", json={
         "name": "testItem1",
         "description": "testDesc1",
+        "deviceTypeId": 1,
         "serialNumber": "FOOB4R",
         "purchaseDate": "1970-01-01",
         "warrantyExpiration": "1971-01-01",
@@ -39,6 +40,7 @@ def testNewItem2():
     response = client.post("/items/", json={
         "name": "testItem2",
         "description": "testDesc2",
+        "deviceTypeId": 1,
         "serialNumber": "B4RGLASS",
         "purchaseDate": "1972-01-01",
         "warrantyExpiration": "1973-01-01",

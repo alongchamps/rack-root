@@ -8,7 +8,7 @@
           { title: 'Name', value: 'name' },
           { title: 'Description', value: 'description' },
           // { title: 'Device Type', value: 'deviceTypeId' },
-          // { title: 'Device Type Name', value: 'deviceType' },
+          { title: 'Device Type Name', value: 'deviceType.name' },
           { title: 'Serial Number', value: 'serialNumber' },
           { title: 'Purchase Date', value: 'purchaseDate' },
           { title: 'Warranty Expiration', value: 'warrantyExpiration' },

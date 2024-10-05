@@ -2,7 +2,7 @@
 from sqlalchemy import create_engine
 import sqlalchemy
 from sqlalchemy import Column, Integer, String, Date, ForeignKey
-from sqlalchemy.orm import sessionmaker, relationship
+from sqlalchemy.orm import sessionmaker, relationship, mapped_column
 from pydantic import BaseModel
 from datetime import date
 from typing import Optional
@@ -25,10 +25,24 @@ class Item(Base):
     warrantyExpiration = Column(Date)
     notes = Column(String)
 
+    deviceTypeId = mapped_column(ForeignKey("deviceTypes.id"))
+    deviceType = relationship("DeviceType", foreign_keys="Item.deviceTypeId")
+
+class DeviceType(Base):
+    __tablename__ = "deviceTypes"
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, index=True)
+
+# Pydantic model for returning device types
+class DeviceTypeResponse(BaseModel):
+    id: int
+    name: str
+
 # Pydantic model for creating an item
 class ItemCreate(BaseModel):
     name: str
     description: str
+    deviceTypeId: int
     serialNumber: Optional[str] =  None
     purchaseDate: Optional[date] =  None
     warrantyExpiration: Optional[date] =  None
@@ -48,20 +62,12 @@ class ItemResponse(BaseModel):
     id: int
     name: str
     description: str
+    deviceTypeId: int
+    deviceType: DeviceTypeResponse
     serialNumber: str
     purchaseDate: date
     warrantyExpiration: date
     notes: str
-
-class DeviceType(Base):
-    __tablename__ = "deviceTypes"
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, index=True)
-
-# Pydantic model for returning device types
-class DeviceTypeResponse(BaseModel):
-    id: int
-    name: str
 
 # Pydantic model for creating device types
 class DeviceTypeCreate(BaseModel):
@@ -70,16 +76,6 @@ class DeviceTypeCreate(BaseModel):
 # Pydantic model for updating a device
 class DeviceTypeUpdate(BaseModel):
     name: Optional[str] = None
-
-# assocation table for items and device types
-class ItemDeviceTypeAssociation(Base):
-    __tablename__ = "ItemDevTypeAssoc"
-
-    id = Column(Integer, primary_key=True)
-    itemId = Column(Integer, ForeignKey('items.id'))
-    deviceTypeId = Column(Integer, ForeignKey('deviceTypes.id'))
-    item = relationship("Item", backref="deviceTypes")
-    deviceType = relationship("DeviceType", backref="items")
 
 # When the nonproduction test database is in use, drop everything to effectively reset it
 if( DATABASE_URL.find("nonproduction.db", 0) > -1 ):
