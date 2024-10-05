@@ -2,10 +2,10 @@
 from sqlalchemy import create_engine
 import sqlalchemy
 from sqlalchemy import Column, Integer, String, Date, ForeignKey
-from sqlalchemy.orm import sessionmaker, relationship, mapped_column
+from sqlalchemy.orm import sessionmaker, relationship, mapped_column, Mapped
 from pydantic import BaseModel
 from datetime import date
-from typing import Optional
+from typing import Optional, List
 import os
 
 # Database setup
@@ -52,6 +52,7 @@ class ItemCreate(BaseModel):
 class ItemUpdate(BaseModel):
     name: Optional[str] = None
     description: Optional[str] = None
+    deviceTypeId: Optional[int] = None
     serialNumber: Optional[str] =  None
     purchaseDate: Optional[date] =  None
     warrantyExpiration: Optional[date] =  None

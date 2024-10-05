@@ -15,9 +15,8 @@ def read_item(item_id: int, db: Session = Depends(get_db)):
     return db_item
 
 ## Creating items
-# def create_item(item: ItemCreate, deviceTypeId: int = Depends(get_valid_device_id), db: Session = Depends(get_db)):
 def create_item(item: ItemCreate, db: Session = Depends(get_db)):
-    # item.deviceTypeId = get_valid_device_id(item.deviceTypeId, db)
+    item.deviceTypeId = get_valid_device_id(item.deviceTypeId, db)
     db_item = Item(**item.model_dump())
     db.add(db_item)
     db.commit()
@@ -26,6 +25,10 @@ def create_item(item: ItemCreate, db: Session = Depends(get_db)):
 
 ## Updating items
 def update_item(item_id: int, item: ItemUpdate, db: Session = Depends(get_db)):
+    # make sure we're getting a valid device ID, if provided
+    if item.deviceTypeId != None:
+        item.deviceTypeId = get_valid_device_id(item.deviceTypeId, db)
+
     # find our item ID in the database and update fields specified in the 'item' argument
     itemsAffected = db.query(Item).filter(Item.id == item_id).update(dict(**item.model_dump(exclude_unset=True)))
     db.commit()

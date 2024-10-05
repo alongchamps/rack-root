@@ -9,6 +9,10 @@ def testMakeDeviceType():
     response = client.post("/deviceTypes/", json={"name": "Test device type"})
     assert response.status_code == 201
 
+def testMakeDeviceType2():
+    response = client.post("/deviceTypes/", json={"name": "Raspberry Pi"})
+    assert response.status_code == 201
+
 def testGettingItemThatDoesntExist():
     response = client.get("/items/2723987")
     assert response.status_code == 404
@@ -34,7 +38,7 @@ def testGetNewlyCreatedItem():
     assert response.content.find(b"1970") > 0
     assert response.content.find(b"1971") > 0
     assert response.content.find(b"notes test") > 0
-    # assert response.content.find(b"Test device type") > 0
+    assert response.content.find(b"Test device type") > 0
 
 def testNewItem2():
     response = client.post("/items/", json={
@@ -48,16 +52,17 @@ def testNewItem2():
         })
     assert response.status_code == 201
 
-# def testNewItemWrongDevice():
-#     response = client.post("/items/", json={
-#         "name": "testItem3",
-#         "description": "test description 3",
-#         "serialNumber": "B4RGLASS",
-#         "purchaseDate": "1974-01-01",
-#         "warrantyExpiration": "1975-01-01",
-#         "notes": "notes test 3"
-#         })
-#     assert response.status_code == 400
+def testNewItemWrongDevice():
+    response = client.post("/items/", json={
+        "name": "testItem3",
+        "description": "test description 3",
+        "deviceTypeId": 47,
+        "serialNumber": "B4RGLASS",
+        "purchaseDate": "1974-01-01",
+        "warrantyExpiration": "1975-01-01",
+        "notes": "notes test 3"
+        })
+    assert response.status_code == 400
 
 def testUpdateItem2():
     # test that the name updates and description stays the name
@@ -66,8 +71,8 @@ def testUpdateItem2():
 
     response = client.get("/items/2")
     assert response.status_code == 200
-    assert response.content.find(b"item2test") > 0
-    assert response.content.find(b"testDesc2") > 0
+    assert response.content.find(b"item2test") > -1
+    assert response.content.find(b"testDesc2") > -1
 
     # opposite test - name does not update and description does
     response = client.patch("/items/2", json={"description": "newDescription2"})
@@ -75,8 +80,22 @@ def testUpdateItem2():
 
     response = client.get("/items/2")
     assert response.status_code == 200
-    assert response.content.find(b"item2test") > 0
-    assert response.content.find(b"newDescription2") > 0
+    assert response.content.find(b"item2test") > -1
+    assert response.content.find(b"newDescription2") > -1
+
+def testUpdateItem3():
+    response = client.patch("/items/2", json={"deviceTypeId": 2})
+    assert response.status_code == 202
+
+    response = client.get("/items/2")
+    assert response.status_code == 200
+    assert response.content.find(b"Raspberry Pi") > -1
+
+def testDevTypeDoesntExist():
+    response = client.patch("/items/2", json={"deviceTypeId": 3})
+    assert response.status_code == 400
+
+
 
 # def testNewItem3():
 #     response = client.post("/items/", json={"name": "item3","description": "description3"})
