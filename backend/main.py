@@ -3,11 +3,13 @@ from fastapi import FastAPI, APIRouter, status
 from fastapi.middleware.cors import CORSMiddleware
 
 # imports for items
-from .database import ItemResponse
+# from .database import ItemResponse
+from .validation_item import ItemResponse
 from .item import read_all_items, read_item, create_item, update_item, delete_item
 
 # imports for device type 
-from .database import DeviceTypeResponse
+# from .database import DeviceTypeResponse
+from .validation_deviceType import DeviceTypeResponse
 from .deviceType import read_all_device_types, read_device_type, create_device_type, update_device_type, delete_device_type
 
 # FastAPI app instance

@@ -1,7 +1,8 @@
 from fastapi import Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 from typing import Optional
-from .database import get_db, DeviceType, DeviceTypeCreate, DeviceTypeUpdate
+from .database import get_db, DeviceType
+from .validation_deviceType import DeviceTypeCreate, DeviceTypeResponse, DeviceTypeUpdate
 
 # reading
 def read_all_device_types(request: Request, db: Session = Depends(get_db), ):

@@ -3,9 +3,9 @@ from sqlalchemy import create_engine
 import sqlalchemy
 from sqlalchemy import Column, Integer, String, Date, ForeignKey
 from sqlalchemy.orm import sessionmaker, relationship, mapped_column, Mapped
-from pydantic import BaseModel
-from datetime import date
-from typing import Optional, List
+# from pydantic import BaseModel
+# from datetime import date
+# from typing import Optional
 import os
 
 # Database setup
@@ -32,51 +32,6 @@ class DeviceType(Base):
     __tablename__ = "deviceTypes"
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, index=True)
-
-# Pydantic model for returning device types
-class DeviceTypeResponse(BaseModel):
-    id: int
-    name: str
-
-# Pydantic model for creating an item
-class ItemCreate(BaseModel):
-    name: str
-    description: str
-    deviceTypeId: int
-    serialNumber: Optional[str] =  None
-    purchaseDate: Optional[date] =  None
-    warrantyExpiration: Optional[date] =  None
-    notes: Optional[str] =  None
-
-# Pydantic model for updating an item
-class ItemUpdate(BaseModel):
-    name: Optional[str] = None
-    description: Optional[str] = None
-    deviceTypeId: Optional[int] = None
-    serialNumber: Optional[str] =  None
-    purchaseDate: Optional[date] =  None
-    warrantyExpiration: Optional[date] =  None
-    notes: Optional[str] =  None
-
-# Pydantic model for responding with an item
-class ItemResponse(BaseModel):
-    id: int
-    name: str
-    description: str
-    deviceTypeId: int
-    deviceType: DeviceTypeResponse
-    serialNumber: str
-    purchaseDate: date
-    warrantyExpiration: date
-    notes: str
-
-# Pydantic model for creating device types
-class DeviceTypeCreate(BaseModel):
-    name: str
-
-# Pydantic model for updating a device
-class DeviceTypeUpdate(BaseModel):
-    name: Optional[str] = None
 
 # When the nonproduction test database is in use, drop everything to effectively reset it
 if( DATABASE_URL.find("nonproduction.db", 0) > -1 ):

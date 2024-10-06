@@ -1,7 +1,10 @@
 from fastapi import Depends, HTTPException, Request
 from sqlalchemy.orm import Session
-from .database import get_db, Item, ItemCreate, ItemUpdate, DeviceType
+from .database import get_db, Item, DeviceType
+
 from .deviceType import get_valid_device_id
+from .validation_item import ItemCreate, ItemUpdate
+
 
 ## Reading items
 def read_all_items(request: Request, db: Session = Depends(get_db)):
