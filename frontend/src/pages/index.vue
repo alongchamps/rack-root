@@ -1,8 +1,86 @@
+<script>
+  export default {
+    data() {
+      return {
+        itemsCount: 0,
+        deviceTypesCount: 0
+      }
+    },
+    methods: {
+      async summaryCounts() {
+        const itemResults = await fetch("http://localhost:8000/items");
+        const items = await itemResults.json();
+        this.itemsCount = items.length
+
+        const deviceTypesResult = await fetch("http://localhost:8000/deviceTypes");
+        const deviceTypes = await deviceTypesResult.json();
+        this.deviceTypesCount = deviceTypes.length
+      }
+    },
+    mounted() {
+      this.summaryCounts();
+    }
+  }
+</script>
+
 <template>
   <navigation />
-  <h1>Welcome to Rack Root</h1>
+  
+  <!-- first row of content with a summary count dashboard-->
+  <v-container>
+    <v-layout class="justify-center">
+      <v-flex>
+        <v-card class="box text-center" color="blue">
+          <v-card-title class="text-h2 item">Items</v-card-title>
+          <v-card-text class="text-h2 text-center">
+            {{ itemsCount }}
+          </v-card-text>
+        </v-card>
+      </v-flex>
+      <v-flex>
+        <v-card class="box text-center" color="green">
+          <v-card-title class="text-h2 item">Types</v-card-title>
+          <v-card-text class="text-h2 text-center">
+            {{ deviceTypesCount }}
+          </v-card-text>
+        </v-card>
+      </v-flex>
+    </v-layout>
+  </v-container>
+
+  <!-- second row of boxes for IPAM summaries-->
+
+  <!-- <v-container>
+    <v-layout class="justify-center">
+      <v-flex>
+        <v-card class="box text-center" color="blue">
+          <v-card-title class="text-h2 item">IPAM Networks</v-card-title>
+          <v-card-text class="text-h2 text-center">
+            3
+          </v-card-text>
+        </v-card>
+      </v-flex>
+      <v-flex>
+        <v-card class="box text-center" color="green">
+          <v-card-title class="text-h2 item">IPAM Networks 2</v-card-title>
+          <v-card-text class="text-h2 text-center">
+            4
+          </v-card-text>
+        </v-card>
+      </v-flex>
+    </v-layout>
+  </v-container> -->
 </template>
 
-<script setup>
-  //
-</script>
+<style scoped>
+  .item {
+    min-height: 50px;
+    min-width: 200px;
+    margin: 20px;
+  }
+
+  .box {
+    border: 5px solid;
+    margin: 20px;
+  }
+</style>

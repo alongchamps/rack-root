@@ -25,7 +25,7 @@ class Item(Base):
     warrantyExpiration = Column(Date)
     notes = Column(String)
 
-    deviceTypeId = mapped_column(ForeignKey("deviceTypes.id"))
+    deviceTypeId = mapped_column(ForeignKey("deviceTypes.id"), nullable=True)
     deviceType = relationship("DeviceType", foreign_keys="Item.deviceTypeId")
 
 class DeviceType(Base):

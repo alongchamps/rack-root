@@ -60,8 +60,10 @@
   <navigation />
   <div class="d-flex justify-center py-10 h-auto">
     <v-card width="75em">
-      <v-tabs v-model="tab">
+      <v-tabs v-model="tab" align-tabs="center">
         <v-tab value="1-devices">Device Types</v-tab>
+        <v-tab value="2-data-xfer">Export/Import</v-tab>
+        <v-tab value="3-placeholder">Placeholder 3</v-tab>
       </v-tabs>
       <v-card-text>
         <v-tabs-window v-model="tab">
@@ -74,10 +76,11 @@
                 </template>
               </v-data-table>
 
-              <!-- the below v-dialog  -->
+              <!-- the below v-dialog opens a modal with one input - a name, and adds it to the database -->
               <v-dialog v-model="newDeviceDialog" max-width="500">
                 <template v-slot:activator="{ props: activatorProps }">
                   <v-btn class="ma-6" prepend-icon="mdi-plus" color="green" v-bind="activatorProps">New Device Type</v-btn>
+                  <v-btn class="ma-6" prepend-icon="mdi-delete" color="red" >Delete all devices (#todo)</v-btn>
                 </template>
                 <v-form @submit.prevent="createNewDeviceType()" id="newDeviceForm">
                   <v-card title="New Device Type">
@@ -91,8 +94,13 @@
                   </v-card>
                 </v-form>
               </v-dialog>
-
           </v-tabs-window-item>
+          <v-tabs-window-item value="2-data-xfer">
+              Todo - add import/export functionality
+          </v-tabs-window-item>
+          <v-tabs-window-item value="3-placeholder">
+            Placeholder 3
+        </v-tabs-window-item>
         </v-tabs-window>
       </v-card-text>
     </v-card>

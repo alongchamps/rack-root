@@ -23,7 +23,7 @@
         this.items = finalItems
       },
       async goToItem(click, row) {
-        this.$router.push('/item/' + row.item.id)
+        this.$router.push('/items/' + row.item.id)
       },
       async getDeviceTypeName( id ) {
         const res = await fetch("http://localhost:8000/deviceTypes/" + id );
