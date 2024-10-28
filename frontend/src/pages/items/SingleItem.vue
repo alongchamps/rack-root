@@ -36,14 +36,16 @@
   <navigation />
   <v-card class="mx-auto" min-width="400" max-width="700">
     <v-card-title class="text-h2">{{ item.name }}</v-card-title>
-    <v-card-subtitle class="text-h4">Device type: {{ item.description }}</v-card-subtitle>
+    <v-divider :thickness="2">Device Type</v-divider>
+    <v-card-text>{{ item.description }}</v-card-text>
+    <v-divider :thickness="2">Serial Number</v-divider>
+    <v-card-text>{{ item.serialNumber }}</v-card-text>
+    <v-divider :thickness="2">Purchase Date</v-divider>
+    <v-card-text>{{ item.purchaseDate }}</v-card-text>
+    <v-divider :thickness="2">Warranty Expiration</v-divider>
+    <v-card-text>{{ item.warrantyExpiration }}</v-card-text>
     <v-divider :thickness="2"></v-divider>
-    <v-card-text class="text-h5">Serial Number:</v-card-text>
-    <v-divider :thickness="2"></v-divider>
-    <v-card-text class="text-h5">Purchase date:</v-card-text>
-    <v-divider :thickness="2"></v-divider>
-    <v-card-text class="text-h5">Warranty expiration:</v-card-text>
-    <v-divider :thickness="2"></v-divider>
+    <!-- placeholder - add network zone here, if defined -->
 
     <v-card-actions>
       <v-btn
@@ -57,6 +59,12 @@
     </v-card-actions>
   </v-card>
 </template>
+
+<style scoped>
+  .infotext {
+    font-size: 16px;
+  }
+</style>
 
 
 
