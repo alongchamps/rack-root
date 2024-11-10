@@ -38,7 +38,7 @@
 
 <template>
     <navigation />
+    <v-btn class="ma-6" prepend-icon="mdi-plus" color="green" :to="{ name: 'NewItem' }">New Item</v-btn>
     <v-data-table :items="items" :headers="headers" item-key="id" @click:row=goToItem>
     </v-data-table>
-    <v-btn class="ma-6" prepend-icon="mdi-plus" color="green" :to="{ name: 'NewItem' }">New Item</v-btn>
 </template>

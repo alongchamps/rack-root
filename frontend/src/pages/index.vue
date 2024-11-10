@@ -48,7 +48,7 @@
     </v-layout>
   </v-container>
 
-  <!-- second row of boxes for IPAM summaries-->
+  <!-- second row of boxes for IPAM summaries, WIP-->
 
   <!-- <v-container>
     <v-layout class="justify-center">
@@ -70,17 +70,19 @@
       </v-flex>
     </v-layout>
   </v-container> -->
+
 </template>
 
 <style scoped>
   .item {
     min-height: 50px;
     min-width: 200px;
-    margin: 20px;
+    margin: 5px;
   }
 
   .box {
-    border: 5px solid;
+    border: 2px solid;
     margin: 20px;
+    border-radius: 10px;
   }
 </style>

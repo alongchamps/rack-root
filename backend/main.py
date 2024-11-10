@@ -19,7 +19,8 @@ router = APIRouter()
 
 # # # # # # # # # # # # # # # # # # # # 
 # routes for handling items
-# # # # # # # # # # # # # # # # # # # # 
+# # # # # # # # # # # # # # # # # # # #
+
 # HTTP GET methods for all items and single items
 router.add_api_route("/items/", read_all_items, methods=['GET'], response_model=list[ItemResponse])
 router.add_api_route("/items/{item_id:int}", read_item, methods=['GET'], response_model=ItemResponse)
