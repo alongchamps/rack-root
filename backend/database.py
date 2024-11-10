@@ -1,8 +1,8 @@
 # Import necessary modules and classes
 from sqlalchemy import create_engine
 import sqlalchemy
-from sqlalchemy import Column, Integer, String, Date, ForeignKey
-from sqlalchemy.orm import sessionmaker, relationship, mapped_column, Mapped
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
+from sqlalchemy.orm import sessionmaker, relationship, mapped_column
 # from pydantic import BaseModel
 # from datetime import date
 # from typing import Optional
@@ -21,8 +21,8 @@ class Item(Base):
     name = Column(String, index=True)
     description = Column(String)
     serialNumber = Column(String)
-    purchaseDate = Column(Date)
-    warrantyExpiration = Column(Date)
+    purchaseDate = Column(DateTime)
+    warrantyExpiration = Column(DateTime)
     notes = Column(String)
 
     deviceTypeId = mapped_column(ForeignKey("deviceTypes.id"), nullable=True)

@@ -77,7 +77,10 @@
             clearable
           ></v-select>
         </v-col>
-        <v-col cols="8">
+        <v-col cols="4">
+          <v-textarea v-model="form.notes" label="Notes" rows=2></v-textarea>
+        </v-col>
+        <v-col cols="4">
         </v-col>
       </v-row>
       <v-row>
