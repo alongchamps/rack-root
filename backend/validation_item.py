@@ -34,4 +34,4 @@ class ItemResponse(BaseModel):
     serialNumber: str
     purchaseDate: datetime
     warrantyExpiration: datetime
-    notes: str
+    notes: Optional[str] = None
