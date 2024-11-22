@@ -3,9 +3,6 @@ from sqlalchemy import create_engine
 import sqlalchemy
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
 from sqlalchemy.orm import sessionmaker, relationship, mapped_column
-# from pydantic import BaseModel
-# from datetime import date
-# from typing import Optional
 import os
 
 # Database setup
@@ -32,6 +29,15 @@ class DeviceType(Base):
     __tablename__ = "deviceTypes"
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, index=True)
+
+class Subnet(Base):
+    __tablename__ = "subnets"
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, index=True)
+    vlan = Column(Integer)
+    classification = Column(String)
+    network = Column(String)
+    subnetMaskBits = Column(Integer)
 
 # When the nonproduction test database is in use, drop everything to effectively reset it
 if( DATABASE_URL.find("nonproduction.db", 0) > -1 ):

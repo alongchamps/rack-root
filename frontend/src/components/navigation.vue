@@ -9,6 +9,9 @@
   <v-navigation-drawer>
     <v-list-item prepend-icon="mdi-home" title="Home" to="/"></v-list-item>
     <v-list-item prepend-icon="mdi-memory" title="Items" to="/items"></v-list-item>
+    <v-list-item prepend-icon="mdi-lan" title="Networks" to="/networks"></v-list-item>
     <v-list-item prepend-icon="mdi-cog" title="Settings" to="/settings"></v-list-item>
   </v-navigation-drawer>
 </template>
+
+<!-- icons are from https://pictogrammers.com/library/mdi/ -->

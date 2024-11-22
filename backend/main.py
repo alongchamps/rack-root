@@ -9,12 +9,15 @@ from .item import read_all_items, read_item, create_item, update_item, delete_it
 
 # imports for device type 
 # from .database import DeviceTypeResponse
-from .validation_deviceType import DeviceTypeResponse
 from .deviceType import read_all_device_types, read_device_type, create_device_type, update_device_type, delete_device_type
+from .validation_deviceType import DeviceTypeResponse
+
+# imports for subnets
+from .subnet import read_all_subnets, read_single_subnet, create_subnet, delete_subnet
+from .validation_subnet import SubnetResponse
 
 # FastAPI app instance
 app = FastAPI()
-
 router = APIRouter()
 
 # # # # # # # # # # # # # # # # # # # # 
@@ -49,8 +52,21 @@ router.add_api_route("/deviceTypes/", create_device_type, methods=['POST'], resp
 router.add_api_route("/deviceTypes/{dev_id:int}", update_device_type, methods=['PUT'], status_code=status.HTTP_202_ACCEPTED)
 
 # HTTP DELETE single device type
-router.add_api_route("/deviceTypes/{dev_id:int}", delete_device_type, methods=['DELETE'] )
+router.add_api_route("/deviceTypes/{dev_id:int}", delete_device_type, methods=['DELETE'])
 
+# # # # # # # # # # # # # # # # # # # # # # # #
+# routes for handling networking / IPAM stuff #
+# # # # # # # # # # # # # # # # # # # # # # # #
+
+# HTTP GET methods
+router.add_api_route("/subnets/", read_all_subnets, methods=['GET'], response_model=list[SubnetResponse])
+router.add_api_route("/subnets/{subnet_id:int}", read_single_subnet, methods=['GET'], response_model=SubnetResponse)
+
+# HTTP POST new subnet
+router.add_api_route("/subnets/", create_subnet, methods=['POST'], response_model=SubnetResponse, status_code=status.HTTP_201_CREATED)
+
+# HTTP DELETE subnet
+router.add_api_route("/subnets/{subnet_id:int}", delete_subnet, methods=['DELETE'] )
 
 app.include_router(router)
 origins = [ "http://localhost:443", "localhost:443", "http://localhost:3000", "localhost:3000", ]

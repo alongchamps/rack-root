@@ -19,6 +19,11 @@ import allItems from '../pages/items/AllItems.vue'
 import singleItem from '../pages/items/SingleItem.vue'
 import newItem from '../pages/items/NewItem.vue'
 
+// pages relating to networking pieces
+import networks from '../pages/networks/AllNetworks.vue'
+import singleNetwork from '../pages/networks/SingleNetwork.vue'
+import newNetwork from '../pages/networks/NewNetwork.vue'
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -46,6 +51,21 @@ const router = createRouter({
       path: '/settings',
       name: 'Settings',
       component: settings
+    },
+    {
+      path: '/networks',
+      name: 'Networks',
+      component: networks
+    },
+    {
+      path: '/networks/:id(\\d+)',
+      name: 'SingleNetwork',
+      component: singleNetwork
+    },
+    {
+      path: '/networks/new',
+      name: 'NewNetwork',
+      component: newNetwork
     },
     {
       path: '/:path*',
