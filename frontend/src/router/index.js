@@ -54,7 +54,7 @@ const router = createRouter({
     },
     {
       path: '/networks',
-      name: 'Networks',
+      name: 'AllNetworks',
       component: networks
     },
     {

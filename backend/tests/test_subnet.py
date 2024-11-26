@@ -4,7 +4,7 @@ from backend.main import app
 client = TestClient(app)
 
 def testMakeSubnet():
-    response = client.post("/subnets/", json={
+    response = client.post("/networks/", json={
         "name": "Intranet-10",
         "vlan": 10,
         "classification": "class-Int",
@@ -14,7 +14,7 @@ def testMakeSubnet():
     assert response.status_code == 201
 
 def testGetFirstSubnet():
-    response = client.get("/subnets/1")
+    response = client.get("/networks/1")
     assert response.status_code == 200
     assert response.content.find(b"Intranet-10") > -1
     assert response.content.find(b"\"vlan\":10") > -1
@@ -23,11 +23,11 @@ def testGetFirstSubnet():
     assert response.content.find(b"24") > -1
 
 def testGetNonExistentSubnet():
-    response = client.get("/subnets/2982982")
+    response = client.get("/networks/2982982")
     assert response.status_code == 404
 
 def testMakeSubnetWithWrongBits():
-    response = client.post("/subnets/", json={
+    response = client.post("/networks/", json={
         "name": "Intranet-10",
         "vlan": 10,
         "classification": "class-Int",
@@ -37,7 +37,7 @@ def testMakeSubnetWithWrongBits():
     assert response.status_code == 400
 
 def testOverlappingNetworks():
-    response = client.post("/subnets/", json={
+    response = client.post("/networks/", json={
         "name": "Intranet-20",
         "vlan": 20,
         "classification": "class-Int-20",

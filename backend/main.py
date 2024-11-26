@@ -59,14 +59,14 @@ router.add_api_route("/deviceTypes/{dev_id:int}", delete_device_type, methods=['
 # # # # # # # # # # # # # # # # # # # # # # # #
 
 # HTTP GET methods
-router.add_api_route("/subnets/", read_all_subnets, methods=['GET'], response_model=list[SubnetResponse])
-router.add_api_route("/subnets/{subnet_id:int}", read_single_subnet, methods=['GET'], response_model=SubnetResponse)
+router.add_api_route("/networks/", read_all_subnets, methods=['GET'], response_model=list[SubnetResponse])
+router.add_api_route("/networks/{subnet_id:int}", read_single_subnet, methods=['GET'], response_model=SubnetResponse)
 
 # HTTP POST new subnet
-router.add_api_route("/subnets/", create_subnet, methods=['POST'], response_model=SubnetResponse, status_code=status.HTTP_201_CREATED)
+router.add_api_route("/networks/", create_subnet, methods=['POST'], response_model=SubnetResponse, status_code=status.HTTP_201_CREATED)
 
 # HTTP DELETE subnet
-router.add_api_route("/subnets/{subnet_id:int}", delete_subnet, methods=['DELETE'] )
+router.add_api_route("/networks/{subnet_id:int}", delete_subnet, methods=['DELETE'] )
 
 app.include_router(router)
 origins = [ "http://localhost:443", "localhost:443", "http://localhost:3000", "localhost:3000", ]

@@ -76,12 +76,12 @@
               <v-date-picker color="blue" class="margin-smaller" v-model="form.warrantyExpiration" show-adjacent-months header="Warranty Expiration"></v-date-picker>
             </v-container>
             <v-checkbox label="Is on the network (placeholder)"></v-checkbox>
+            <v-btn class="a-submit-1" prepend-icon="mdi-plus" color="green" type="Submit">Create New Item</v-btn>
           </v-form>
         </v-row>
         <v-row class="text-center">
           <v-card-actions>
             <v-btn class="a-submit-2" prepend-icon="mdi-arrow-left" color="yellow" :to="{ name: 'AllItems' }">Back to all items</v-btn>
-            <v-btn class="a-submit-1" prepend-icon="mdi-plus" color="green" type="Submit">Create New Item</v-btn>
           </v-card-actions>
         </v-row>
       </v-container>

@@ -20,7 +20,7 @@ def read_single_subnet(subnet_id: int, db: Session = Depends(get_db)):
 def create_subnet(subnet: SubnetCreate, db: Session = Depends(get_db)):
     db_subnet = Subnet(**subnet.model_dump())
 
-    # data validation before we save the network details to the database
+    # 2 data validations before we save the network details to the database
 
     # make sure we got an IP network, if any exception is thrown, we probably have bad data
     # for example, host bits are set (if network = 192.168.12.10 and subnet mask is /24, the network input really should be 192.168.12.0)
@@ -37,9 +37,13 @@ def create_subnet(subnet: SubnetCreate, db: Session = Depends(get_db)):
             raise HTTPException(status_code=400, detail="Networks must be unique.")
 
     # if we get down here, actually save the data
-    db.add(db_subnet)
-    db.commit()
-    db.refresh(db_subnet)
+    try:
+        db.add(db_subnet)
+        db.commit()
+        db.refresh(db_subnet)
+    except:
+        raise HTTPException(status_code=500, detail="Issue saving the record to the database.")
+
     return db_subnet
 
 # delete a single subnet
