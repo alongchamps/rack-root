@@ -13,8 +13,8 @@ from .deviceType import read_all_device_types, read_device_type, create_device_t
 from .validation_deviceType import DeviceTypeResponse
 
 # imports for subnets
-from .subnet import read_all_subnets, read_single_subnet, create_subnet, delete_subnet
-from .validation_subnet import SubnetResponse
+from .subnet import read_all_subnets, read_single_subnet, create_subnet, delete_subnet, add_gateway, delete_gateway
+from .validation_subnet import SubnetResponse # , SubnetUpdate
 
 # FastAPI app instance
 app = FastAPI()
@@ -66,8 +66,17 @@ router.add_api_route("/networks/{subnet_id:int}", read_single_subnet, methods=['
 router.add_api_route("/networks/", create_subnet, methods=['POST'], response_model=SubnetResponse, status_code=status.HTTP_201_CREATED)
 
 # HTTP DELETE subnet
-router.add_api_route("/networks/{subnet_id:int}", delete_subnet, methods=['DELETE'] )
+router.add_api_route("/networks/{subnet_id:int}", delete_subnet, methods=['DELETE'])
 
+# gateway related records
+router.add_api_route("/networks/{subnet_id:int}/gateway", add_gateway, methods=['POST'], status_code=status.HTTP_201_CREATED)
+router.add_api_route("/networks/{subnet_id:int}/gateway", delete_gateway, methods=['DELETE'], status_code=status.HTTP_200_OK)
+
+# # # # # # # # # # # # #
+# end HTTP methods here #
+# # # # # # # # # # # # #
+
+# add the router and set origins
 app.include_router(router)
 origins = [ "http://localhost:443", "localhost:443", "http://localhost:3000", "localhost:3000", ]
 app.add_middleware( CORSMiddleware, allow_origins=origins, allow_credentials=True, allow_methods=["*"], allow_headers=["*"])

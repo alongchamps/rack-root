@@ -9,6 +9,7 @@ class SubnetResponse(BaseModel):
     classification: str
     network: str
     subnetMaskBits: int
+    gateway: Optional[str] =  None
 
 # Pydantic model for creating device types
 class SubnetCreate(BaseModel):
@@ -17,3 +18,7 @@ class SubnetCreate(BaseModel):
     classification: str
     network: str
     subnetMaskBits: int
+    gateway: Optional[str] =  None
+
+class SubnetUpdateGateway(BaseModel):
+    gateway: Optional[str] =  None

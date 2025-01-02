@@ -1,8 +1,8 @@
 from fastapi import Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 from .database import get_db, Subnet
-from .validation_subnet import SubnetCreate
-from ipaddress import ip_network
+from .validation_subnet import SubnetCreate, SubnetUpdateGateway
+from ipaddress import ip_network,ip_address
 
 # get all subnets from the database
 def read_all_subnets(request: Request, db: Session = Depends(get_db)):
@@ -16,7 +16,7 @@ def read_single_subnet(subnet_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Item not found")
     return db_subnet
 
-# create a new subnet
+# create a new subnet and make sure we don't overlap with any existing ranges already saved
 def create_subnet(subnet: SubnetCreate, db: Session = Depends(get_db)):
     db_subnet = Subnet(**subnet.model_dump())
 
@@ -55,3 +55,44 @@ def delete_subnet(subnet_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="A subnet with that ID was not found")
 
     return 0
+
+# add a gateway record to the provided subnet
+def add_gateway(subnet_id: int, subnet: SubnetUpdateGateway, db: Session = Depends(get_db)):
+    # get the record from the DB
+    db_subnet = db.query(Subnet).filter(Subnet.id == subnet_id).first()
+
+    if db_subnet is None:
+        raise HTTPException(status_code=404, detail="Item not found")
+
+    # check that provided gateway is actually in this network
+    valid_gateway = gateway_in_subnet(subnet.gateway, db_subnet.network, db_subnet.subnetMaskBits)
+
+    if valid_gateway == False:
+        raise HTTPException(status_code=500, detail="Provided gateway is not in that subnet range.")
+
+    # update the record
+    try:
+        items_affected = db.query(Subnet).filter(Subnet.id == subnet_id).update(dict(**subnet.model_dump()))
+        db.commit()
+    except:
+        raise HTTPException(status_code=500, deatil="Issue adding the gateway")
+
+    return 0
+
+# find the subnet record and nullify the field for the gateway
+def delete_gateway(subnet_id: int, db: Session = Depends(get_db)):
+    # get the record from the DB
+    db_subnet = db.query(Subnet).filter(Subnet.id == subnet_id).first()
+
+    db_subnet.gateway = None
+    
+    db.commit()
+    db.refresh(db_subnet)
+
+    return 0
+
+# returns true or false if a gateway is within a given subnet or not
+def gateway_in_subnet(gateway: str, subnet: str, subnet_mask: int):
+    
+    network_object = ip_network("{0}/{1}".format(subnet, subnet_mask))
+    return ip_address(gateway) in network_object

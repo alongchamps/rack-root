@@ -38,6 +38,7 @@ class Subnet(Base):
     classification = Column(String)
     network = Column(String)
     subnetMaskBits = Column(Integer)
+    gateway = Column(String)
 
 # When the nonproduction test database is in use, drop everything to effectively reset it
 if( DATABASE_URL.find("nonproduction.db", 0) > -1 ):
