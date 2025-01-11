@@ -13,7 +13,7 @@ from .deviceType import read_all_device_types, read_device_type, create_device_t
 from .validation_deviceType import DeviceTypeResponse
 
 # imports for subnets
-from .subnet import read_all_subnets, read_single_subnet, create_subnet, delete_subnet, add_gateway, delete_gateway
+from .subnet import read_all_subnets, read_single_subnet, create_subnet, delete_subnet, set_gateway
 from .validation_subnet import SubnetResponse # , SubnetUpdate
 
 # FastAPI app instance
@@ -69,8 +69,7 @@ router.add_api_route("/networks/", create_subnet, methods=['POST'], response_mod
 router.add_api_route("/networks/{subnet_id:int}", delete_subnet, methods=['DELETE'])
 
 # gateway related records
-router.add_api_route("/networks/{subnet_id:int}/gateway", add_gateway, methods=['POST'], status_code=status.HTTP_201_CREATED)
-router.add_api_route("/networks/{subnet_id:int}/gateway", delete_gateway, methods=['DELETE'], status_code=status.HTTP_200_OK)
+router.add_api_route("/networks/{subnet_id:int}/gateway", set_gateway, methods=['POST'], status_code=status.HTTP_200_OK)
 
 # # # # # # # # # # # # #
 # end HTTP methods here #

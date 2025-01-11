@@ -47,6 +47,9 @@
             <v-btn class="a-submit-1" prepend-icon="mdi-plus" color="green" type="Submit">Create New Network</v-btn>
           </v-form>
         </v-row>
+        <v-card-actions>
+          <v-btn class="a-submit-2" prepend-icon="mdi-arrow-left" color="yellow" :to="{ name: 'AllNetworks' }">Back to all networks</v-btn>
+        </v-card-actions>
       </v-container>
     </v-card>
   </div>

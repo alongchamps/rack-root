@@ -56,43 +56,48 @@ def delete_subnet(subnet_id: int, db: Session = Depends(get_db)):
 
     return 0
 
-# add a gateway record to the provided subnet
-def add_gateway(subnet_id: int, subnet: SubnetUpdateGateway, db: Session = Depends(get_db)):
-    # get the record from the DB
+# configure the gateway on a given network. This method can be used to clear a gateway, set a gateway,
+# or update a gateway - all in one function
+def set_gateway(subnet_id: int, subnet: SubnetUpdateGateway, db: Session = Depends(get_db)):
+
+    # look for our database record
     db_subnet = db.query(Subnet).filter(Subnet.id == subnet_id).first()
 
     if db_subnet is None:
         raise HTTPException(status_code=404, detail="Item not found")
+    
+    # if a gateway is provided, check that provided gateway is actually in this network
+    if len(subnet.gateway) > 0:
+        
+        valid_gateway = gateway_in_subnet(subnet.gateway, db_subnet.network, db_subnet.subnetMaskBits)
 
-    # check that provided gateway is actually in this network
-    valid_gateway = gateway_in_subnet(subnet.gateway, db_subnet.network, db_subnet.subnetMaskBits)
+        if valid_gateway == False:
+            raise HTTPException(status_code=500, detail="Provided gateway is not in that subnet range.")
 
-    if valid_gateway == False:
-        raise HTTPException(status_code=500, detail="Provided gateway is not in that subnet range.")
+    # there is no else here because if the gateway is empty, the code/database will accept it and clear the record
 
     # update the record
     try:
         items_affected = db.query(Subnet).filter(Subnet.id == subnet_id).update(dict(**subnet.model_dump()))
         db.commit()
     except:
-        raise HTTPException(status_code=500, deatil="Issue adding the gateway")
+        raise HTTPException(status_code=500, detail="Issue setting the gateway")
 
     return 0
 
-# find the subnet record and nullify the field for the gateway
-def delete_gateway(subnet_id: int, db: Session = Depends(get_db)):
-    # get the record from the DB
-    db_subnet = db.query(Subnet).filter(Subnet.id == subnet_id).first()
-
-    db_subnet.gateway = None
-    
-    db.commit()
-    db.refresh(db_subnet)
-
-    return 0
-
-# returns true or false if a gateway is within a given subnet or not
+# returns true or false if the gateway is in the provided network
 def gateway_in_subnet(gateway: str, subnet: str, subnet_mask: int):
+
+    # error handling here makes sure we can cast the provided inputs
+    # to the actual ip_address and ip_network types
+    try:
+        gateway_object = ip_address(gateway)
+    except:
+        raise HTTPException(status_code=500, detail="Issue converting provided input to an IP address")
+
+    try:
+        network_object = ip_network("{0}/{1}".format(subnet, subnet_mask))
+    except:
+        raise HTTPException(status_code=500, detail="Issue converting provided input details to a network")
     
-    network_object = ip_network("{0}/{1}".format(subnet, subnet_mask))
-    return ip_address(gateway) in network_object
+    return gateway_object in network_object.hosts()

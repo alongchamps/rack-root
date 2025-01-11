@@ -3,7 +3,8 @@
     data() {
       return {
         itemsCount: 0,
-        deviceTypesCount: 0
+        deviceTypesCount: 0,
+        networksCount: 0
       }
     },
     methods: {
@@ -15,6 +16,10 @@
         const deviceTypesResult = await fetch("http://localhost:8000/deviceTypes");
         const deviceTypes = await deviceTypesResult.json();
         this.deviceTypesCount = deviceTypes.length
+
+        const networkResult = await fetch("http://localhost:8000/networks");
+        const networks = await networkResult.json();
+        this.networksCount = networks.length
       }
     },
     mounted() {
@@ -42,6 +47,14 @@
           <v-card-title class="text-h2 item">Types</v-card-title>
           <v-card-text class="text-h2 text-center">
             {{ deviceTypesCount }}
+          </v-card-text>
+        </v-card>
+      </v-flex>
+      <v-flex>
+        <v-card class="box text-center" color="red">
+          <v-card-title class="text-h2 item">VLANs</v-card-title>
+          <v-card-text class="text-h2 text-center">
+            {{ networksCount }}
           </v-card-text>
         </v-card>
       </v-flex>

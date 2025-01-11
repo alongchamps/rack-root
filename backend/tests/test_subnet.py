@@ -69,7 +69,9 @@ def testGetSecondSubnet():
     assert response.content.find(b"10.0.2.1") > -1
 
 def testGatewayDeletion():
-    response = client.delete("/networks/2/gateway")
+    response = client.post("/networks/2/gateway", json={
+        "gateway": ""
+    })
     assert response.status_code == 200
 
     response = client.get("/networks/2")
@@ -79,7 +81,7 @@ def testGatewayAddition():
     response = client.post("/networks/2/gateway", json={
         "gateway": "10.0.2.253"
     })
-    assert response.status_code == 201
+    assert response.status_code == 200
 
     response = client.get("/networks/2")
     assert response.content.find(b"10.0.2.253") > -1
@@ -88,7 +90,7 @@ def testChangingGateway():
     response = client.post("/networks/2/gateway", json={
         "gateway": "10.0.2.1"
     })
-    assert response.status_code == 201
+    assert response.status_code == 200
 
     response = client.get("/networks/2")
     assert response.content.find(b"10.0.2.1") > -1
