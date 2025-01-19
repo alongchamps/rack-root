@@ -1,7 +1,7 @@
 # Import necessary modules and classes
 from sqlalchemy import create_engine
 import sqlalchemy
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Enum
 from sqlalchemy.orm import sessionmaker, relationship, mapped_column
 import os
 
@@ -39,6 +39,15 @@ class Subnet(Base):
     network = Column(String)
     subnetMaskBits = Column(Integer)
     gateway = Column(String)
+    # ipam = relationship("IpRecord", back_populates="subnet")
+
+class IpRecord(Base):
+    __tablename__ = "iprecords"
+    id = Column(Integer, primary_key=True, index=True)
+    status = Column(String)
+    ipaddress = Column(String)
+    # subnet_id = mapped_column(ForeignKey("subnets.id"))
+    # subnet = relationship("Subnet", back_populates="ipam")
 
 # When the nonproduction test database is in use, drop everything to effectively reset it
 if( DATABASE_URL.find("nonproduction.db", 0) > -1 ):

@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from .database import get_db, Subnet
 from .validation_subnet import SubnetCreate, SubnetUpdateGateway
 from ipaddress import ip_network,ip_address
+from .iprecords import create_ip_record, reserve_ip
 
 # get all subnets from the database
 def read_all_subnets(request: Request, db: Session = Depends(get_db)):
@@ -22,28 +23,42 @@ def create_subnet(subnet: SubnetCreate, db: Session = Depends(get_db)):
 
     # 2 data validations before we save the network details to the database
 
-    # make sure we got an IP network, if any exception is thrown, we probably have bad data
+    # 1. make sure we got an IP network, if any exception is thrown, we probably have bad data
     # for example, host bits are set (if network = 192.168.12.10 and subnet mask is /24, the network input really should be 192.168.12.0)
     try:
         validate_network = ip_network(db_subnet.network + "/" + str(db_subnet.subnetMaskBits))
     except:
         raise HTTPException(status_code=400, detail="Invalid network provided")
 
-    # make sure the new range doesn't overlap with anything we already have
+    # 2. make sure the new range doesn't overlap with anything we already have
     all_networks = db.query(Subnet)
     for n in all_networks:
         tmp_network = ip_network(str(n.network) + "/" + str(n.subnetMaskBits))
         if tmp_network.overlaps(validate_network):
             raise HTTPException(status_code=400, detail="Networks must be unique.")
 
-    # if we get down here, actually save the data
+    # save the data to the database here
     try:
         db.add(db_subnet)
         db.commit()
         db.refresh(db_subnet)
     except:
-        raise HTTPException(status_code=500, detail="Issue saving the record to the database.")
+        raise HTTPException(status_code=500, detail="Issue creating the network in the database.")
 
+    # # get the current network so we can read the ID and gateway
+    # new_subnet_record = db.query(Subnet).filter(Subnet.network == subnet.network).first()
+    
+    # # create records in the IP record table
+    # # for each usable IP in the network, create a record with a foreign key back to this new network
+    # network_object = ip_network("{0}/{1}".format(new_subnet_record.network, new_subnet_record.subnetMaskBits))
+    # for addr in network_object.hosts():
+    #     create_ip_record(new_subnet_record.id, addr.compressed) # sample input: 1, 192.168.12.1
+
+    # # if the network had a gateway, reserve that record now
+    # if new_subnet_record.gateway is not None:
+    #     reserve_ip(new_subnet_record.id, new_subnet_record.gateway)
+
+    
     return db_subnet
 
 # delete a single subnet

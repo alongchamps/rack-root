@@ -6,3 +6,4 @@ sqlalchemy.orm
 pydantic
 uvicorn
 pytest-env
+sqlmodel

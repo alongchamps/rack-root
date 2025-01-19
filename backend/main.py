@@ -16,6 +16,10 @@ from .validation_deviceType import DeviceTypeResponse
 from .subnet import read_all_subnets, read_single_subnet, create_subnet, delete_subnet, set_gateway
 from .validation_subnet import SubnetResponse # , SubnetUpdate
 
+# imports for IP records
+from .iprecords import get_ip_records
+from .validation_iprecord import IpRecordResponse
+
 # FastAPI app instance
 app = FastAPI()
 router = APIRouter()
@@ -54,9 +58,9 @@ router.add_api_route("/deviceTypes/{dev_id:int}", update_device_type, methods=['
 # HTTP DELETE single device type
 router.add_api_route("/deviceTypes/{dev_id:int}", delete_device_type, methods=['DELETE'])
 
-# # # # # # # # # # # # # # # # # # # # # # # #
-# routes for handling networking / IPAM stuff #
-# # # # # # # # # # # # # # # # # # # # # # # #
+# # # # # # # # # # # # # # # #
+# routes for handling networks # 
+# # # # # # # # # # # # # # # #
 
 # HTTP GET methods
 router.add_api_route("/networks/", read_all_subnets, methods=['GET'], response_model=list[SubnetResponse])
@@ -70,6 +74,13 @@ router.add_api_route("/networks/{subnet_id:int}", delete_subnet, methods=['DELET
 
 # gateway related records
 router.add_api_route("/networks/{subnet_id:int}/gateway", set_gateway, methods=['POST'], status_code=status.HTTP_200_OK)
+
+# # # # # # # # # # # # # #
+# routes for handling IPAM #
+# # # # # # # # # # # # # #
+
+# get all IPs for a network
+router.add_api_route("/networks/{subnet_id:int}/ipam", get_ip_records, methods=['GET'], response_model=list[IpRecordResponse], status_code=status.HTTP_200_OK)
 
 # # # # # # # # # # # # #
 # end HTTP methods here #
