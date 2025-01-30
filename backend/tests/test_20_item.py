@@ -21,7 +21,7 @@ def testNewItem():
     response = client.post("/items/", json={
         "name": "testItem1",
         "description": "testDesc1",
-        "deviceTypeId": 1,
+        "deviceTypeId": 2,
         "serialNumber": "FOOB4R",
         "purchaseDate": "1970-01-01",
         "warrantyExpiration": "1971-01-01",
@@ -44,7 +44,7 @@ def testNewItem2():
     response = client.post("/items/", json={
         "name": "testItem2",
         "description": "testDesc2",
-        "deviceTypeId": 1,
+        "deviceTypeId": 2,
         "serialNumber": "B4RGLASS",
         "purchaseDate": "1972-01-01",
         "warrantyExpiration": "1973-01-01",
@@ -84,7 +84,7 @@ def testUpdateItem2():
     assert response.content.find(b"newDescription2") > -1
 
 def testUpdateItem3():
-    response = client.patch("/items/2", json={"deviceTypeId": 2})
+    response = client.patch("/items/2", json={"deviceTypeId": 3})
     assert response.status_code == 202
 
     response = client.get("/items/2")
@@ -92,7 +92,7 @@ def testUpdateItem3():
     assert response.content.find(b"Raspberry Pi") > -1
 
 def testDevTypeDoesntExist():
-    response = client.patch("/items/2", json={"deviceTypeId": 3})
+    response = client.patch("/items/2", json={"deviceTypeId": 4})
     assert response.status_code == 400
 
 
@@ -129,9 +129,9 @@ def testGetAllInventoryItems():
     assert response.status_code == 200
 
 def testDeleteInventoryItem():
-    response = client.delete("/items/1")
+    response = client.delete("/items/2")
     assert response.status_code == 200
 
 def testDeleteItemAgain():
-    response = client.delete("/items/1")
+    response = client.delete("/items/2")
     assert response.status_code == 404

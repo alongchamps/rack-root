@@ -75,7 +75,7 @@
               <v-date-picker color="blue" class="margin-smaller" v-model="form.purchaseDate" show-adjacent-months header="Purchase date"></v-date-picker>
               <v-date-picker color="blue" class="margin-smaller" v-model="form.warrantyExpiration" show-adjacent-months header="Warranty Expiration"></v-date-picker>
             </v-container>
-            <v-checkbox label="Is on the network (placeholder)"></v-checkbox>
+            <!-- <v-checkbox label="Is on the network (placeholder)"></v-checkbox> -->
             <v-btn class="a-submit-1" prepend-icon="mdi-plus" color="green" type="Submit">Create New Item</v-btn>
           </v-form>
         </v-row>

@@ -2,85 +2,80 @@
 from fastapi import FastAPI, APIRouter, status
 from fastapi.middleware.cors import CORSMiddleware
 
-# imports for items
-# from .database import ItemResponse
-from .validation_item import ItemResponse
-from .item import read_all_items, read_item, create_item, update_item, delete_item
+# imports for different object types
+from .deviceType import readAllDeviceTypes, readDeviceType, createDeviceType, updateDeviceType, deleteDeviceType
+from .iprecords import getIpRecords
+from .item import readAllItems, readItem, createItem, updateItem, deleteItem
+from .subnet import readAllSubnets, readSingleSubnet, createSubnet, deleteSubnet, setGateway
 
-# imports for device type 
-# from .database import DeviceTypeResponse
-from .deviceType import read_all_device_types, read_device_type, create_device_type, update_device_type, delete_device_type
-from .validation_deviceType import DeviceTypeResponse
-
-# imports for subnets
-from .subnet import read_all_subnets, read_single_subnet, create_subnet, delete_subnet, set_gateway
-from .validation_subnet import SubnetResponse # , SubnetUpdate
-
-# imports for IP records
-from .iprecords import get_ip_records
+# base database classes and validation classes for FastAPI
+from .database import DeviceType, Item, Subnet
+from .validation_deviceType import DeviceTypeCreate, DeviceTypeResponse, DeviceTypeUpdate
 from .validation_iprecord import IpRecordResponse
+from .validation_item import ItemCreate, ItemUpdate, ItemResponse
+from .validation_subnet import SubnetCreate, SubnetResponse, SubnetUpdateGateway
 
 # FastAPI app instance
 app = FastAPI()
 router = APIRouter()
-
-# # # # # # # # # # # # # # # # # # # # 
-# routes for handling items
-# # # # # # # # # # # # # # # # # # # #
-
-# HTTP GET methods for all items and single items
-router.add_api_route("/items/", read_all_items, methods=['GET'], response_model=list[ItemResponse])
-router.add_api_route("/items/{item_id:int}", read_item, methods=['GET'], response_model=ItemResponse)
-
-# HTTP POST create new item
-router.add_api_route("/items/", create_item, methods=['POST'], response_model=ItemResponse, status_code=status.HTTP_201_CREATED)
-
-# HTTP PUT update item
-router.add_api_route("/items/{item_id:int}", update_item, methods=['PATCH'], status_code=status.HTTP_202_ACCEPTED)
-
-# HTTP DELETE a single inventory item
-router.add_api_route("/items/{item_id:int}", delete_item, methods=['DELETE'], status_code=status.HTTP_200_OK)
 
 # # # # # # # # # # # # # # # # # #
 # routes for handling device types
 # # # # # # # # # # # # # # # # # #
 
 # HTTP GET methods for all device types and single device types
-router.add_api_route("/deviceTypes/", read_all_device_types, methods=['GET'], response_model=list[DeviceTypeResponse])
-router.add_api_route("/deviceTypes/{dev_id:int}", read_device_type, methods=['GET'], response_model=DeviceTypeResponse)
+router.add_api_route("/deviceTypes/", readAllDeviceTypes, methods=['GET'], response_model=list[DeviceTypeResponse])
+router.add_api_route("/deviceTypes/{devId:int}", readDeviceType, methods=['GET'], response_model=DeviceTypeResponse)
 
 # HTTP POST new device type
-router.add_api_route("/deviceTypes/", create_device_type, methods=['POST'], response_model=DeviceTypeResponse, status_code=status.HTTP_201_CREATED)
+router.add_api_route("/deviceTypes/", createDeviceType, methods=['POST'], response_model=DeviceTypeCreate, status_code=status.HTTP_201_CREATED)
 
 # HTTP PUT update single device type
-router.add_api_route("/deviceTypes/{dev_id:int}", update_device_type, methods=['PUT'], status_code=status.HTTP_202_ACCEPTED)
+router.add_api_route("/deviceTypes/{devId:int}", updateDeviceType, methods=['PUT'], response_model=DeviceTypeUpdate, status_code=status.HTTP_202_ACCEPTED)
 
 # HTTP DELETE single device type
-router.add_api_route("/deviceTypes/{dev_id:int}", delete_device_type, methods=['DELETE'])
+router.add_api_route("/deviceTypes/{devId:int}", deleteDeviceType, methods=['DELETE'])
 
-# # # # # # # # # # # # # # # #
-# routes for handling networks # 
-# # # # # # # # # # # # # # # #
+# # # # # # # # # # # # # # # # # # # # 
+# routes for handling items
+# # # # # # # # # # # # # # # # # # # #
+
+# HTTP GET methods for all items and single items
+router.add_api_route("/items/", readAllItems, methods=['GET'], response_model=list[ItemResponse])
+router.add_api_route("/items/{itemId:int}", readItem, methods=['GET'], response_model=ItemResponse)
+
+# HTTP POST create new item
+router.add_api_route("/items/", createItem, methods=['POST'], response_model=ItemResponse, status_code=status.HTTP_201_CREATED)
+
+# HTTP PUT update item
+router.add_api_route("/items/{itemId:int}", updateItem, methods=['PATCH'], status_code=status.HTTP_202_ACCEPTED)
+
+# HTTP DELETE a single inventory item
+router.add_api_route("/items/{itemId:int}", deleteItem, methods=['DELETE'], status_code=status.HTTP_200_OK)
+
+# # # # # # # # # # # # # # # # #
+# # routes for handling networks # 
+# # # # # # # # # # # # # # # # #
 
 # HTTP GET methods
-router.add_api_route("/networks/", read_all_subnets, methods=['GET'], response_model=list[SubnetResponse])
-router.add_api_route("/networks/{subnet_id:int}", read_single_subnet, methods=['GET'], response_model=SubnetResponse)
+router.add_api_route("/networks/", readAllSubnets, methods=['GET'], response_model=list[SubnetResponse])
+router.add_api_route("/networks/{subnetId:int}", readSingleSubnet, methods=['GET'], response_model=SubnetResponse)
 
 # HTTP POST new subnet
-router.add_api_route("/networks/", create_subnet, methods=['POST'], response_model=SubnetResponse, status_code=status.HTTP_201_CREATED)
+router.add_api_route("/networks/", createSubnet, methods=['POST'], response_model=SubnetCreate, status_code=status.HTTP_201_CREATED)
 
 # HTTP DELETE subnet
-router.add_api_route("/networks/{subnet_id:int}", delete_subnet, methods=['DELETE'])
+router.add_api_route("/networks/{subnetId:int}", deleteSubnet, methods=['DELETE'])
 
-# gateway related records
-router.add_api_route("/networks/{subnet_id:int}/gateway", set_gateway, methods=['POST'], status_code=status.HTTP_200_OK)
+# TODO: refactor this somewhere else?
+router.add_api_route("/networks/{subnetId:int}/gateway", setGateway, methods=['POST'], status_code=status.HTTP_200_OK)
 
-# # # # # # # # # # # # # #
-# routes for handling IPAM #
-# # # # # # # # # # # # # #
+# # # # # # # # # # # # # # #
+# # routes for handling IPAM #
+# # # # # # # # # # # # # # #
 
-# get all IPs for a network
-router.add_api_route("/networks/{subnet_id:int}/ipam", get_ip_records, methods=['GET'], response_model=list[IpRecordResponse], status_code=status.HTTP_200_OK)
+# # get all IPs for a network
+router.add_api_route("/networks/{subnetId:int}/ipam", getIpRecords, methods=['GET'], response_model=list[IpRecordResponse], status_code=status.HTTP_200_OK)
 
 # # # # # # # # # # # # #
 # end HTTP methods here #

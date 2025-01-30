@@ -53,6 +53,7 @@
       prepend-icon="mdi-delete" 
       color="red" 
       variant="elevated"
+      @click.native="deleteItem()"
       >
       <!-- @click.native="deleteItem()"> -->
       Delete device</v-btn>
