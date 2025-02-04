@@ -4,7 +4,7 @@ from .deviceType import getValidDeviceId
 from sqlmodel import Session, select
 
 ## Reading items
-def readAllItems(request: Request, db: Session = Depends(getDb)):
+def readAllItems(db: Session = Depends(getDb)):
     query = select(Item).join(DeviceType, isouter=True)
     results = db.exec(query)
     return results

@@ -8,7 +8,6 @@ class SubnetCreate(SQLModel):
     classification: str
     network: str
     subnetMaskBits: int
-    # gateway: Optional[str] = None
 
 class SubnetResponse(SQLModel):
     id: int
@@ -17,8 +16,4 @@ class SubnetResponse(SQLModel):
     classification: str
     network: str
     subnetMaskBits: int
-    # gateway: Optional[str] = None
     ipam: Optional[list[IpRecord]] = None
-
-class SubnetUpdateGateway(SQLModel):
-    gateway: Optional[str] = None

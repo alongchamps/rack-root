@@ -2,8 +2,9 @@ from fastapi import Depends, HTTPException
 from ipaddress import ip_network,ip_address
 from sqlmodel import Session, select
 
-from .database import getDb, Subnet
-from .iprecords import createIpRecord, reserveIp
+from .database import getDb, Subnet, IpRecord
+from .iprecords import createIpRecord, clearIpAddress
+from .validation_iprecord import IpRecordGateway
 
 # get all subnets from the database
 def readAllSubnets(db: Session = Depends(getDb)):
@@ -74,10 +75,6 @@ def createSubnet(subnet: Subnet, db: Session = Depends(getDb)):
             print(e)
             raise HTTPException(status_code=503, detail="subnet.createSubnet - issue making IPAM record...")
 
-    # if a gateway is provided, save that in the database
-    # if newSubnet.gateway is not None:
-    #     reserveIp(subnetId=newSubnet.id, ipAddress=newSubnet.gateway, reservationType="gateway", db=db)
-
     return newSubnet
 
 # delete a single subnet
@@ -97,38 +94,45 @@ def deleteSubnet(subnetId: int, db: Session = Depends(getDb)):
     
     return 0
 
-# configure the gateway on a given network. This method can be used to clear a gateway, set a gateway,
-# or update a gateway - all in one function
-def setGateway(subnetId: int, incomingGateway: Subnet, db: Session = Depends(getDb)):
-
-    # look for our database record
-    query = select(Subnet).where(Subnet.id == subnetId)
-    subnetToUpdate = db.exec(query).one()
-
-    if subnetToUpdate is None:
-        raise HTTPException(status_code=404, detail="Subnet not found")
+# find the gateway associated with this subnet, from the IpRecord table, if it exists
+def readGateway(subnetId: int, db: Session = Depends(getDb)):
+    query = select(IpRecord).where(IpRecord.subnetId == subnetId).where(IpRecord.status == "Gateway")
+    results = db.exec(query).first()
     
-    # if a gateway is provided, check that provided gateway is actually in this network
-    if len(incomingGateway.gateway) > 0:
-        
-        validGateway = gatewayInSubnet(incomingGateway.gateway, subnetToUpdate.network, subnetToUpdate.subnetMaskBits)
+    return results
 
-        if validGateway == False:
-            raise HTTPException(status_code=500, detail="Provided gateway is not in that subnet range.")
-
-    # there is no else here because if the gateway is empty, the code/database will accept it and clear the record
-
-    if subnetToUpdate:
-        for k, v in incomingGateway.model_dump(exclude_unset=True).items():
-            setattr(subnetToUpdate, k, v)
-
-    # update the 
+# This function set the gateway for the provided subnetId, by updating the IpAddress table.
+# The first query will find the relevant IP record, which has an added bonus of also making
+# sure the provided gateway is in the network. If no result comes back, the IP / subnet 
+# relationship is wrong. This will also clear an existing Gateway assignment if one is found.
+def setGateway(subnetId: int, incomingGateway: IpRecordGateway, db: Session = Depends(getDb)):
+    # find our IpRecord
+    ipRecordQuery = select(IpRecord).where(IpRecord.subnetId == subnetId).where(IpRecord.ipAddress == incomingGateway.gateway)
     try:
-        db.add(subnetToUpdate)
+        ipRecordToupdate = db.exec(ipRecordQuery).one()
+    except:
+        raise HTTPException(status_code=500, detail="No matching IP records found. Is that IP on that network?")
+
+    # clear an existing record, if found
+    deleteGateway(subnetId, db)
+
+    ipRecordToupdate.status = "Gateway"
+
+    try:
+        db.add(ipRecordToupdate)
         db.commit()
-        db.refresh(subnetToUpdate)
+        db.refresh(ipRecordToupdate)
     except:
         raise HTTPException(status_code=500, detail="Issue setting the gateway")
+
+    return incomingGateway
+
+# find IP records on subnetId with the status 'Gateway', and change that to 'Available'
+def deleteGateway(subnetId: int, db: Session = Depends(getDb)):
+    query = select(IpRecord).where(IpRecord.subnetId == subnetId).where(IpRecord.status == "Gateway")
+    results = db.exec(query).one()
+    if results is not None:    
+        clearIpAddress(subnetId, results.ipAddress, db)
 
     return 0
 
@@ -138,13 +142,13 @@ def gatewayInSubnet(gateway: str, subnet: str, subnetMask: int):
     # error handling here makes sure we can cast the provided inputs
     # to the actual ip_address and ip_network types
     try:
-        gateway_object = ip_address(gateway)
+        gatewayObject = ip_address(gateway)
     except:
         raise HTTPException(status_code=500, detail="Issue converting provided input to an IP address")
 
     try:
-        network_object = ip_network("{0}/{1}".format(subnet, subnetMask))
+        networkObject = ip_network("{0}/{1}".format(subnet, subnetMask))
     except:
         raise HTTPException(status_code=500, detail="Issue converting provided input details to a network")
     
-    return gateway_object in network_object.hosts()
+    return gatewayObject in networkObject.hosts()

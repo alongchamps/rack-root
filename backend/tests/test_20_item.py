@@ -130,7 +130,7 @@ def testGetAllInventoryItems():
 
 def testDeleteInventoryItem():
     response = client.delete("/items/2")
-    assert response.status_code == 200
+    assert response.status_code == 204
 
 def testDeleteItemAgain():
     response = client.delete("/items/2")

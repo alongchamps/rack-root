@@ -13,3 +13,6 @@ class IpRecordResponse(SQLModel):
     ipAddress: str
     subnetId: Optional[int]
     subnet: Optional[SubnetResponse]
+
+class IpRecordGateway(SQLModel):
+    gateway: str
