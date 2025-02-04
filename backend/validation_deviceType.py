@@ -1,15 +1,14 @@
-from pydantic import BaseModel
+from .database import Item
+from sqlmodel import SQLModel
 from typing import Optional
 
-# Pydantic model for returning device types
-class DeviceTypeResponse(BaseModel):
+class DeviceTypeResponse(SQLModel):
     id: int
     name: str
+    items: list["Item"]
 
-# Pydantic model for creating device types
-class DeviceTypeCreate(BaseModel):
+class DeviceTypeCreate(SQLModel):
     name: str
 
-# Pydantic model for updating a device
-class DeviceTypeUpdate(BaseModel):
+class DeviceTypeUpdate(SQLModel):
     name: Optional[str] = None

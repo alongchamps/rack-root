@@ -9,7 +9,7 @@ def testMakeSubnet():
         "vlan": 10,
         "classification": "class-Int",
         "network": "10.0.1.0",
-        "subnetMaskBits": "24"
+        "subnetMaskBits": 24
     })
     assert response.status_code == 201
 
@@ -32,7 +32,7 @@ def testMakeSubnetWithWrongBits():
         "vlan": 10,
         "classification": "class-Int",
         "network": "10.0.0.2",
-        "subnetMaskBits": "24"
+        "subnetMaskBits": 24
     })
     assert response.status_code == 400
 
@@ -42,19 +42,18 @@ def testOverlappingNetworks():
         "vlan": 20,
         "classification": "class-Int-20",
         "network": "10.0.1.128",
-        "subnetMaskBits": "26"
+        "subnetMaskBits": 26
     })
     assert response.status_code == 400
     assert response.content.find(b"Networks must be unique.") > -1
 
-def testNewNetworkWithGateway():
+def testNewNetwork2():
     response = client.post("/networks/", json={
         "name": "Test-intranet-2",
         "vlan": 2,
         "classification": "class-Int",
         "network": "10.0.2.0",
-        "subnetMaskBits": "24",
-        "gateway": "10.0.2.1"
+        "subnetMaskBits": 24
     })
     assert response.status_code == 201
 
@@ -66,42 +65,62 @@ def testGetSecondSubnet():
     assert response.content.find(b"class-Int") > -1
     assert response.content.find(b"10.0.2.0") > -1
     assert response.content.find(b"24") > -1
-    assert response.content.find(b"10.0.2.1") > -1
-
-def testGatewayDeletion():
-    response = client.post("/networks/2/gateway", json={
-        "gateway": ""
-    })
-    assert response.status_code == 200
-
-    response = client.get("/networks/2")
-    assert response.content.find(b"10.0.2.1") == -1
 
 def testGatewayAddition():
     response = client.post("/networks/2/gateway", json={
         "gateway": "10.0.2.253"
     })
-    assert response.status_code == 200
+    assert response.status_code == 201
 
-    response = client.get("/networks/2")
+def testGatewayFromIpam():
+    response = client.get("/networks/2/ipam")
+    assert response.content.find(b"10.0.2.253") > -1
+
+def testGatewayDeletion():
+    response = client.delete("/networks/2/gateway")
+    assert response.status_code == 204
+
+def testGatewayFromIpam2():
+    response = client.get("/networks/2/ipam")
+    assert response.content.find(b"\"gateway\": \"\"") == -1
+
+def testGatewayAdditionPartTwo():
+    response = client.post("/networks/2/gateway", json={
+        "gateway": "10.0.2.253"
+    })
+    assert response.status_code == 201
+
+    response = client.get("/networks/2/ipam")
     assert response.content.find(b"10.0.2.253") > -1
 
 def testChangingGateway():
     response = client.post("/networks/2/gateway", json={
         "gateway": "10.0.2.1"
     })
-    assert response.status_code == 200
+    assert response.status_code == 201
 
     response = client.get("/networks/2")
     assert response.content.find(b"10.0.2.1") > -1
 
+# # check that the server does not accept an IP address outside of a network's range
 def testGatewayNotInSubnet():
-    # check that the server does not accept an IP address outside of a network's range
     response = client.post("/networks/2/gateway", json={
         "gateway": "192.168.12.1"
     })
     assert response.status_code == 500
     
     #now check that the gateway didn't change
-    response = client.get("/networks/2")
+    response = client.get("/networks/2/gateway")
     assert response.content.find(b"10.0.2.1") > -1
+
+# {"ipAddress":"10.0.1.1","status":"Gateway","id":1,"subnetId":1}
+
+def testAddingDuplicateNetwork():
+    response = client.post("/networks/", json={
+        "name": "Test-intranet-2",
+        "vlan": 2,
+        "classification": "class-Int",
+        "network": "10.0.2.0",
+        "subnetMaskBits": 24
+    })
+    assert response.status_code == 400

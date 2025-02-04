@@ -1,21 +1,20 @@
 from datetime import datetime
-from pydantic import BaseModel
+from sqlmodel import SQLModel
 from typing import Optional
 
 from .validation_deviceType import DeviceTypeResponse
 
-# Pydantic model for creating an item
-class ItemCreate(BaseModel):
+class ItemCreate(SQLModel):
     name: str
-    description: str
+    description: Optional[str]
     deviceTypeId: int
     serialNumber: Optional[str] =  None
     purchaseDate: Optional[datetime] =  None
     warrantyExpiration: Optional[datetime] =  None
     notes: Optional[str] =  None
+    DeviceType: DeviceTypeResponse = None
 
-# Pydantic model for updating an item
-class ItemUpdate(BaseModel):
+class ItemUpdate(SQLModel):
     name: Optional[str] = None
     description: Optional[str] = None
     deviceTypeId: Optional[int] = None
@@ -23,15 +22,16 @@ class ItemUpdate(BaseModel):
     purchaseDate: Optional[datetime] =  None
     warrantyExpiration: Optional[datetime] =  None
     notes: Optional[str] =  None
+    DeviceType: DeviceTypeResponse = None
 
-# Pydantic model for responding with an item
-class ItemResponse(BaseModel):
+class ItemResponse(SQLModel):
     id: int
     name: str
-    description: str
+    description: Optional[str]
     deviceTypeId: int
     deviceType: DeviceTypeResponse
-    serialNumber: str
-    purchaseDate: datetime
-    warrantyExpiration: datetime
+    serialNumber: Optional[str] =  None
+    purchaseDate: Optional[datetime] =  None
+    warrantyExpiration: Optional[datetime] =  None
     notes: Optional[str] = None
+    DeviceType: DeviceTypeResponse = None

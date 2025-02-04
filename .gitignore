@@ -3,3 +3,4 @@ backend/production.db
 backend/nonproduction.db
 notes.txt
 backend/production.db.bkup
+sqlmodel-nonproduction.db

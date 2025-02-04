@@ -1,36 +1,56 @@
 from fastapi import Depends, HTTPException
-from sqlalchemy.orm import Session
-from .database import get_db, IpRecord
+from sqlmodel import Session, select
+from .database import getDb, IpRecord
 from ipaddress import ip_network, ip_address
 
-def get_ip_records(network_id: int, db: Session = Depends(get_db)):
-    db_items = db.query(IpRecord).filter(IpRecord.subnet_id == network_id)
-    return db_items
+# def getIpRecords(networkId: int, db: Session = Depends(getDb)):
+def getIpRecords(subnetId: int, db: Session = Depends(getDb)):
+    query = select(IpRecord).where(IpRecord.subnetId == subnetId)
+    results = db.exec(query)
+    return results
 
-# todo: make this more efficient by batching up DB requests
-# perhaps there's a way to make these all at once?
-def create_ip_record(network_id: int, ip_address: str, db: Session = Depends(get_db)):
-    # set inputs 
-    ip_record = IpRecord()
-    ip_record.subnet_id = network_id
-    ip_record.status = "Available"
-    ip_record.ipaddress = ip_address
-
-    # save the data to the database here
+def createIpRecord(subnetId: int, ipAddress: str, db: Session):
+    newIpRecord = IpRecord(status="Available", ipAddress=ipAddress, subnetId=subnetId)
+    
     try:
-        db.add(ip_record)
+        db.add(newIpRecord)
         db.commit()
-        db.refresh(ip_record)
+        db.refresh(newIpRecord)
     except:
-        raise HTTPException(status_code=500, detail="Issue creating the network in the database.")
+        raise HTTPException(status_code=500, detail="iprecords.createIpRecord - Issue creating the IP record in the database.")
 
     return 0
 
-def reserve_ip(network_id: int, ip_address: str, db: Session = Depends(get_db)):
+def reserveIp(subnetId: int, ipAddress: str, reservationType: str, db: Session):
+    query = select(IpRecord).where(IpRecord.subnetId == subnetId).where(IpRecord.ipAddress == ipAddress)
+    updatedIpRecord = db.exec(query).first()
+
+    updatedIpRecord.status = reservationType
+
+    try:
+        db.add(updatedIpRecord)
+        db.commit()
+        db.refresh(updatedIpRecord)
+    except:
+        raise HTTPException(status_code=500, detail="iprecords.reserveIp - Issue assigning a status to an IP record in the database.")
+
     return 0
 
-def reserve_ip_dhcp(network_id: int, ip_address_start: str, ip_address_end: str, db: Session = Depends(get_db)):
+def reserveIpDhcp(subnetId: int, ipAddressStart: str, ipAddressEnd: str, db: Session):
+    # todo
     return 0
 
-def clear_ip_address(network_id: int, ip_address: str, db: Session = Depends(get_db)):
+def clearIpAddress(subnetId: int, ipAddress: str, db: Session):
+    query = select(IpRecord).where(IpRecord.subnetId == subnetId).where(IpRecord.ipAddress == ipAddress)
+    updatedIpRecord = db.exec(query).first()
+
+    updatedIpRecord.status = "Available"
+
+    try:
+        db.add(updatedIpRecord)
+        db.commit()
+        db.refresh(updatedIpRecord)
+    except:
+        raise HTTPException(status_code=500, detail="iprecords.clearIpAddress - Issue assigning a status to an IP record in the database.")
+    
     return 0

@@ -1,51 +1,68 @@
-from fastapi import Depends, HTTPException, Request
-from sqlalchemy.orm import Session
-from .database import get_db, Item, DeviceType
-
-from .deviceType import get_valid_device_id
-from .validation_item import ItemCreate, ItemUpdate
+from fastapi import Depends, HTTPException, Request, status
+from .database import getDb, DeviceType, Item
+from .deviceType import getValidDeviceId
+from sqlmodel import Session, select
 
 ## Reading items
-def read_all_items(request: Request, db: Session = Depends(get_db)):
-    db_items = db.query(Item).join(DeviceType)
-    return db_items
+def readAllItems(db: Session = Depends(getDb)):
+    query = select(Item).join(DeviceType, isouter=True)
+    results = db.exec(query)
+    return results
 
-def read_item(item_id: int, db: Session = Depends(get_db)):
-    db_item = db.query(Item).join(DeviceType).filter(Item.id == item_id).first()
-    if db_item is None:
+def readItem(itemId: int, db: Session = Depends(getDb)):
+    query = select(Item).where(Item.id == itemId).join(DeviceType, isouter=True)
+    results = db.exec(query).first()
+
+    if results is None:
         raise HTTPException(status_code=404, detail="Item not found")
-    return db_item
+    return results
 
 ## Creating items
-def create_item(item: ItemCreate, db: Session = Depends(get_db)):
-    item.deviceTypeId = get_valid_device_id(item.deviceTypeId, db)
-    db_item = Item(**item.model_dump())
-    db.add(db_item)
+def createItem(item: Item, db: Session = Depends(getDb)):
+    try:
+        testDeviceId = getValidDeviceId(item.deviceTypeId, db)
+    except:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST)
+
+    newItem = Item(**item.model_dump(exclude_unset=True))
+    # newItem.deviceTypeId = getValidDeviceId(item.deviceTypeId, db)
+    db.add(newItem)
     db.commit()
-    db.refresh(db_item)
-    return db_item
+    db.refresh(newItem)
+
+    return newItem
 
 ## Updating items
-def update_item(item_id: int, item: ItemUpdate, db: Session = Depends(get_db)):
+def updateItem(itemId: int, item: Item, db: Session = Depends(getDb)):
     # make sure we're getting a valid device ID, if provided
     if item.deviceTypeId != None:
-        item.deviceTypeId = get_valid_device_id(item.deviceTypeId, db)
+        item.deviceTypeId = getValidDeviceId(item.deviceTypeId, db)
+    
+    statement = select(Item).where(Item.id == itemId)
+    results = db.exec(statement)
+    itemToUpdate = results.one()
 
-    # find our item ID in the database and update fields specified in the 'item' argument
-    itemsAffected = db.query(Item).filter(Item.id == item_id).update(dict(**item.model_dump(exclude_unset=True)))
-    db.commit()
-
-    if itemsAffected == 0:
+    if itemToUpdate:
+        for k, v in item.model_dump(exclude_unset=True).items():
+            setattr(itemToUpdate, k, v)
+    else:
         raise HTTPException(status_code=404, detail="An item with that ID was not found")
 
-    return itemsAffected
+    db.add(itemToUpdate)
+    db.commit()
+    db.refresh(itemToUpdate)
+
+    return 0
 
 ## Deleting items
-def delete_item(item_id: int, db: Session = Depends(get_db)):
-    db_delete = db.query(Item).filter(Item.id == item_id).delete(synchronize_session="auto")
-    db.commit()
-
-    if db_delete == 0:
+def deleteItem(itemId: int, db: Session = Depends(getDb)):
+    query = select(Item).where(Item.id == itemId)
+    results = db.exec(query)
+    try:
+        itemToDelete = results.one()
+        db.delete(itemToDelete)
+        db.commit()
+    except: 
         raise HTTPException(status_code=404, detail="An item with that ID was not found")
 
     return 0

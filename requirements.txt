@@ -7,3 +7,4 @@ pydantic
 uvicorn
 pytest-env
 sqlmodel
+psycopg2-binary

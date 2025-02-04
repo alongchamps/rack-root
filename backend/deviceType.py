@@ -1,50 +1,74 @@
-from fastapi import Depends, HTTPException, Request
-from sqlalchemy.orm import Session
+from fastapi import Depends, HTTPException
 from typing import Optional
-from .database import get_db, DeviceType
-from .validation_deviceType import DeviceTypeCreate, DeviceTypeResponse, DeviceTypeUpdate
+from .database import getDb, DeviceType, Item
+from sqlmodel import Session, select
 
 # reading
-def read_all_device_types(request: Request, db: Session = Depends(get_db), ):
-    db_items = db.query(DeviceType)
-    return db_items
+def readAllDeviceTypes(db: Session = Depends(getDb)):
+    query = select(DeviceType)
+    results = db.exec(query)
+    return results
 
-def read_device_type(dev_id: int, db: Session = Depends(get_db)):
-    db_item = db.query(DeviceType).filter(DeviceType.id == dev_id).first()
-    if db_item is None:
+def readDeviceType(devId: int, db: Session = Depends(getDb)):
+    query = select(DeviceType).where(DeviceType.id == devId)
+    results = db.exec(query).first()
+
+    if results is None:
         raise HTTPException(status_code=404, detail="A device with that ID was not found")
 
-    return db_item
+    return results
 
-def get_valid_device_id( deviceTypeId: Optional[int] = None, db: Session = Depends(get_db) ) -> int:
-    if deviceTypeId is None:
+def getValidDeviceId( devId: Optional[int] = None, db: Session = Depends(getDb) ) -> int:
+    if devId is None:
         raise HTTPException(status_code=400, detail="Device type ID is required")
+
+    query = select(DeviceType).where(DeviceType.id == devId)
+    results = db.exec(query).first()
     
-    deviceType = db.query(DeviceType).filter(DeviceType.id == deviceTypeId).first()
-    if deviceType is None:
+    if results is None:
         raise HTTPException(status_code=400, detail="Invalid device ID")
-    return deviceTypeId
+    
+    return results.id
 
 # creating
-def create_device_type(deviceType: DeviceTypeCreate, db: Session = Depends(get_db)):
-    db_item = DeviceType(**deviceType.model_dump())
-    db.add(db_item)
+def createDeviceType(deviceType: DeviceType, db: Session = Depends(getDb)):
+    newDeviceType = DeviceType(**deviceType.model_dump())
+    db.add(newDeviceType)
     db.commit()
-    db.refresh(db_item)
-    return db_item
+    db.refresh(newDeviceType)
+    return newDeviceType
 
 # Updating
-def update_device_type(dev_id: int, devUpdate: DeviceTypeUpdate, db: Session = Depends(get_db)):
-    itemsAffected = db.query(DeviceType).filter(DeviceType.id == dev_id).update(dict(**devUpdate.model_dump()))
+def updateDeviceType(devId: int, devUpdate: DeviceType, db: Session = Depends(getDb)):
+    # find our object from the database
+    statement = select(DeviceType).where(DeviceType.id == devId)
+    results = db.exec(statement)
+    deviceToUpdate = results.one()
+
+    if deviceToUpdate:
+        for k, v in devUpdate.model_dump(exclude_unset=True).items():
+            setattr(deviceToUpdate, k, v)
+    else:
+        raise HTTPException(status_code=404, detail="A device with that ID was not found")
+
+    # want something like this to work
+    # deviceToUpdate.update(**devUpdate.model_dump(exclude_unset=True))
+
+    db.add(deviceToUpdate)
     db.commit()
-    return itemsAffected
+    db.refresh(deviceToUpdate)
+
+    return deviceToUpdate
 
 ## Deleting
-def delete_device_type(dev_id: int, db: Session = Depends(get_db)):
-    db_delete = db.query(DeviceType).filter(DeviceType.id == dev_id).delete(synchronize_session="auto")
-    db.commit()
-
-    if db_delete == 0:
+def deleteDeviceType(devId: int, db: Session = Depends(getDb)):
+    query = select(DeviceType).where(DeviceType.id == devId)
+    results = db.exec(query)
+    try:
+        typeToDelete = results.one()
+        db.delete(typeToDelete)
+        db.commit()
+    except: 
         raise HTTPException(status_code=404, detail="A device with that ID was not found")
 
     return 0
