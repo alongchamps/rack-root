@@ -6,8 +6,12 @@
           gateway: ''
         },
         network: {},
+        gateway: {},
         newGatewayDialog: false,
-        invalidGatewayInput: false
+        invalidGatewayInput: false,
+        totalIps: 0,
+        availableIps: 0,
+        dhcpIps: 0
       }
     },
     methods: {
@@ -21,13 +25,22 @@
         }
 
         this.network = networkResult;
+        this.totalIps = networkResult.ipam.length
+        this.availableIps = networkResult.ipam.filter((ip) => ip.status == "Available").length
+        this.dhcpIps = networkResult.ipam.filter((ip) => ip.status == "DHCP").length
 
-        this.form.gateway = networkResult.gateway
+        const resGateway = await fetch("http://localhost:8000/networks/" + id + "/gateway/")
+
+        if (resGateway.status == 200 ) {
+          const gatewayResult = await resGateway.json()  
+          this.gateway = gatewayResult
+          this.form.gateway = gatewayResult.ipAddress
+        }
       },
       async setGateway() {
 
         // send the input to the backend and let that validate whether it's valid
-        const res = await fetch("http://localhost:8000/networks/" + this.network.id + "/gateway", {
+        const res = await fetch("http://localhost:8000/networks/" + this.network.id + "/gateway/", {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -67,7 +80,7 @@
     <v-row>
       <v-col cols="12" sm="4">
         <v-sheet class="ma-5 pa-5 text-h5">
-          <b>Base IP</b>: {{ network.network }}
+          <b>Network</b>: {{ network.network }}
         </v-sheet>
       </v-col>
       <v-col cols="12" sm="4">
@@ -79,7 +92,7 @@
         <v-sheet class="ma-5 pa-5 text-h5">
           <div style="display:flex; justify-content:space-between">
             <div>
-              <b>Gateway:</b> {{ network.gateway }}
+              <b>Gateway:</b> {{ gateway.ipAddress }}
             </div>
             <div>
               <v-btn icon="mdi-wrench" color="yellow" variant="outlined" size="small" @click.stop="newGatewayDialog = true"></v-btn>
@@ -98,6 +111,23 @@
       <v-col cols="12" sm="4">
         <v-sheet class="ma-5 pa-5 text-h5">
           <b>Classification:</b> {{ network.classification }}
+        </v-sheet>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="12" sm="4">
+        <v-sheet class="ma-5 pa-5 text-h5 mb-10">
+        Total IPs: {{ this.totalIps }}
+        </v-sheet>
+      </v-col>
+      <v-col cols="12" sm="4">
+        <v-sheet class="ma-5 pa-5 text-h5 mb-10">
+        Available IPs: {{ this.availableIps }}
+        </v-sheet>
+      </v-col>
+      <v-col cols="12" sm="4">
+        <v-sheet class="ma-5 pa-5 text-h5 mb-10">
+        DHCP IPs: {{ this.dhcpIps }}
         </v-sheet>
       </v-col>
     </v-row>

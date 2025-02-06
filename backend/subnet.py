@@ -97,8 +97,11 @@ def deleteSubnet(subnetId: int, db: Session = Depends(getDb)):
 # find the gateway associated with this subnet, from the IpRecord table, if it exists
 def readGateway(subnetId: int, db: Session = Depends(getDb)):
     query = select(IpRecord).where(IpRecord.subnetId == subnetId).where(IpRecord.status == "Gateway")
-    results = db.exec(query).first()
-    
+    try:
+        results = db.exec(query).one()
+    except:
+        return None
+
     return results
 
 # This function set the gateway for the provided subnetId, by updating the IpAddress table.
@@ -130,11 +133,15 @@ def setGateway(subnetId: int, incomingGateway: IpRecordGateway, db: Session = De
 # find IP records on subnetId with the status 'Gateway', and change that to 'Available'
 def deleteGateway(subnetId: int, db: Session = Depends(getDb)):
     query = select(IpRecord).where(IpRecord.subnetId == subnetId).where(IpRecord.status == "Gateway")
-    results = db.exec(query).one()
+    try:
+        results = db.exec(query).one()
+    except:
+        return None
+
     if results is not None:    
         clearIpAddress(subnetId, results.ipAddress, db)
 
-    return 0
+    return None
 
 # returns true or false if the gateway is in the provided network
 def gatewayInSubnet(gateway: str, subnet: str, subnetMask: int):

@@ -67,7 +67,7 @@ def testGetSecondSubnet():
     assert response.content.find(b"24") > -1
 
 def testGatewayAddition():
-    response = client.post("/networks/2/gateway", json={
+    response = client.post("/networks/2/gateway/", json={
         "gateway": "10.0.2.253"
     })
     assert response.status_code == 201
@@ -77,7 +77,7 @@ def testGatewayFromIpam():
     assert response.content.find(b"10.0.2.253") > -1
 
 def testGatewayDeletion():
-    response = client.delete("/networks/2/gateway")
+    response = client.delete("/networks/2/gateway/")
     assert response.status_code == 204
 
 def testGatewayFromIpam2():
@@ -85,7 +85,7 @@ def testGatewayFromIpam2():
     assert response.content.find(b"\"gateway\": \"\"") == -1
 
 def testGatewayAdditionPartTwo():
-    response = client.post("/networks/2/gateway", json={
+    response = client.post("/networks/2/gateway/", json={
         "gateway": "10.0.2.253"
     })
     assert response.status_code == 201
@@ -94,7 +94,7 @@ def testGatewayAdditionPartTwo():
     assert response.content.find(b"10.0.2.253") > -1
 
 def testChangingGateway():
-    response = client.post("/networks/2/gateway", json={
+    response = client.post("/networks/2/gateway/", json={
         "gateway": "10.0.2.1"
     })
     assert response.status_code == 201
@@ -104,16 +104,14 @@ def testChangingGateway():
 
 # # check that the server does not accept an IP address outside of a network's range
 def testGatewayNotInSubnet():
-    response = client.post("/networks/2/gateway", json={
+    response = client.post("/networks/2/gateway/", json={
         "gateway": "192.168.12.1"
     })
     assert response.status_code == 500
     
     #now check that the gateway didn't change
-    response = client.get("/networks/2/gateway")
+    response = client.get("/networks/2/gateway/")
     assert response.content.find(b"10.0.2.1") > -1
-
-# {"ipAddress":"10.0.1.1","status":"Gateway","id":1,"subnetId":1}
 
 def testAddingDuplicateNetwork():
     response = client.post("/networks/", json={

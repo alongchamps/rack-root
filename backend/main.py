@@ -68,9 +68,9 @@ router.add_api_route("/networks/", createSubnet, methods=['POST'], response_mode
 router.add_api_route("/networks/{subnetId:int}", deleteSubnet, methods=['DELETE'], status_code=status.HTTP_204_NO_CONTENT)
 
 # gateway related routes
-router.add_api_route("/networks/{subnetId:int}/gateway", readGateway, methods=['GET'], status_code=status.HTTP_200_OK)
-router.add_api_route("/networks/{subnetId:int}/gateway", setGateway, methods=['POST'], response_model=IpRecordGateway, status_code=status.HTTP_201_CREATED)
-router.add_api_route("/networks/{subnetId:int}/gateway", deleteGateway, methods=['DELETE'], status_code=status.HTTP_204_NO_CONTENT)
+router.add_api_route("/networks/{subnetId:int}/gateway/", readGateway, methods=['GET'], response_model=IpRecordResponse, status_code=status.HTTP_200_OK)
+router.add_api_route("/networks/{subnetId:int}/gateway/", setGateway, methods=['POST'], response_model=IpRecordGateway, status_code=status.HTTP_201_CREATED)
+router.add_api_route("/networks/{subnetId:int}/gateway/", deleteGateway, methods=['DELETE'], status_code=status.HTTP_204_NO_CONTENT)
 
 # # # # # # # # # # # # # # #
 # # routes for handling IPAM
