@@ -1,5 +1,3 @@
-# docker run --name postgres-fastapi -e POSTGRES_PASSWORD=postgres-fastapi --rm -p 5432:5432 postgres
-
 # Import necessary modules and classes
 from datetime import datetime
 from sqlmodel import create_engine, Field, Relationship, Session, SQLModel
@@ -34,7 +32,6 @@ class Subnet(SQLModel, table=True):
     classification: str
     network: str
     subnetMaskBits: int
-    # gateway: str | None = None
     ipam: list["IpRecord"] | None = Relationship(back_populates="subnet")
 
 class IpRecord(SQLModel, table=True):
@@ -43,6 +40,12 @@ class IpRecord(SQLModel, table=True):
     ipAddress: str
     subnetId: int | None = Field(default=None, foreign_key="subnet.id")
     subnet: Optional[Subnet] | None = Relationship(back_populates="ipam")
+    dhcpRangeId: int | None = Field(default=None, foreign_key="dhcprange.id")
+
+class DhcpRange(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True, index=True)
+    name: str
+    description: Optional[str]
 
 # When the nonproduction test database is in use, drop everything to effectively reset it
 if( sqlite_url.find("localhost:5555", 0) > -1):

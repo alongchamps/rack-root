@@ -2,9 +2,7 @@
 
 I'm writing this design doc to give me practice in such a thing and also get my thoughts on digital paper in some structured format. I'll try to keep this in line with what's actually in the code, and we'll see how good I am at that!
 
-The goal for Rack Root is two fold - one side is teaching myself about web development and software design, the other is to actually keep track of all the devices in my home lab.
 
-This app should be portable enough to run in a single docker container and I might add features to that layer at some point in the future. Notably, persistence of the data is in a local sqlite database file in the `/backend` directory.
 
 # Data and relationships
 

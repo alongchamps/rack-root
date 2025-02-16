@@ -72,26 +72,17 @@ def testGatewayAddition():
     })
     assert response.status_code == 201
 
-def testGatewayFromIpam():
-    response = client.get("/networks/2/ipam")
+def testReadingGateway():
+    response = client.get("/networks/2/gateway/")
     assert response.content.find(b"10.0.2.253") > -1
 
 def testGatewayDeletion():
     response = client.delete("/networks/2/gateway/")
     assert response.status_code == 204
 
-def testGatewayFromIpam2():
-    response = client.get("/networks/2/ipam")
-    assert response.content.find(b"\"gateway\": \"\"") == -1
-
-def testGatewayAdditionPartTwo():
-    response = client.post("/networks/2/gateway/", json={
-        "gateway": "10.0.2.253"
-    })
-    assert response.status_code == 201
-
-    response = client.get("/networks/2/ipam")
-    assert response.content.find(b"10.0.2.253") > -1
+def testGatewayMissing():
+    response = client.get("/networks/2/gateway/")
+    assert response.content.find(b"null") > -1
 
 def testChangingGateway():
     response = client.post("/networks/2/gateway/", json={
@@ -99,10 +90,16 @@ def testChangingGateway():
     })
     assert response.status_code == 201
 
-    response = client.get("/networks/2")
+    response = client.get("/networks/2/gateway/")
     assert response.content.find(b"10.0.2.1") > -1
 
-# # check that the server does not accept an IP address outside of a network's range
+def testReadAllSubnets():
+    response = client.get("/networks/")
+    assert response.status_code == 200
+    assert response.content.find(b"Intranet-10") > -1
+    assert response.content.find(b"Test-intranet-2") > -1
+
+# check that the server does not accept an IP address outside of a network's range
 def testGatewayNotInSubnet():
     response = client.post("/networks/2/gateway/", json={
         "gateway": "192.168.12.1"

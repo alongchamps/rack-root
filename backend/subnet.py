@@ -73,7 +73,7 @@ def createSubnet(subnet: Subnet, db: Session = Depends(getDb)):
             createIpRecord(subnetId=newSubnet.id, ipAddress=addr.compressed, db=db)
         except Exception as e:
             print(e)
-            raise HTTPException(status_code=503, detail="subnet.createSubnet - issue making IPAM record...")
+            raise HTTPException(status_code=400, detail="subnet.createSubnet - issue making IPAM record...")
 
     return newSubnet
 
