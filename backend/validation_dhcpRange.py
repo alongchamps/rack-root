@@ -5,9 +5,11 @@ class DhcpResponse(SQLModel):
     id: int
     name: str
     description: Optional[str] = None
+    startIp: str
+    endIp: str
 
 class DhcpCreate(SQLModel):
     name: str
     description: Optional[str] = None
-    start: str
-    end: str
+    startIp: str
+    endIp: str

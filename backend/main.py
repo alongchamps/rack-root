@@ -90,7 +90,7 @@ router.add_api_route("/networks/{subnetId:int}/ipam/", getIpRecords, methods=['G
 router.add_api_route("/networks/{subnetId:int}/dhcp/{dhcpId:int}", readSingleDhcpRange, methods=['GET'], response_model=None, status_code=status.HTTP_200_OK)
 
 # HTTP POST new DHCP range on a subnet
-router.add_api_route("/networks/{subnetId:int}/dhcp/", newDhcpRange, methods=['POST'], response_model=DhcpResponse, status_code=status.HTTP_201_CREATED)
+router.add_api_route("/networks/{subnetId:int}/dhcp/", newDhcpRange, methods=['POST'], response_model=DhcpCreate, status_code=status.HTTP_201_CREATED)
 
 # HTTP DELETE DHCP range from a subnet
 router.add_api_route("/networks/{subnetId:int}/dhcp/{dhcpId:int}", deleteDhcpRange, methods=['DELETE'], status_code=status.HTTP_204_NO_CONTENT)

@@ -17,14 +17,14 @@ def newDhcpRange(newDhcpRange:DhcpCreate, subnetId: int, db: Session = Depends(g
 
     # make sure both IPs we got in are defined in the table
     try:
-        firstIpQuery = select(IpRecord).where(IpRecord.subnetId == subnetId).where(IpRecord.ipAddress == newDhcpRange.start)
+        firstIpQuery = select(IpRecord).where(IpRecord.subnetId == subnetId).where(IpRecord.ipAddress == newDhcpRange.startIp)
         # use .one() at the end of our results so that it will throw an informative error when 0 records are found
         firstIp = db.exec(firstIpQuery).one()
     except:
         raise HTTPException(status_code=400, detail="dhcpRange.newDhcpRange - First IP address not found in the database")
     
     try:
-        lastIpQuery = select(IpRecord).where(IpRecord.subnetId == subnetId).where(IpRecord.ipAddress == newDhcpRange.end)
+        lastIpQuery = select(IpRecord).where(IpRecord.subnetId == subnetId).where(IpRecord.ipAddress == newDhcpRange.endIp)
         # use .one() at the end of our results so that it will throw an informative error when 0 records are found
         lastIp = db.exec(lastIpQuery).one()
     except:
@@ -32,10 +32,7 @@ def newDhcpRange(newDhcpRange:DhcpCreate, subnetId: int, db: Session = Depends(g
     
     # make the record in the database
     try:
-        newDhcpObject = DhcpRange(name=newDhcpRange.name, description=newDhcpRange.description)
-
-        # if newDhcpRange.description is not None:
-        #     newDhcpObject.description = newDhcpRange.description
+        newDhcpObject = DhcpRange(name=newDhcpRange.name, description=newDhcpRange.description, startIp=newDhcpRange.startIp, endIp=newDhcpRange.endIp)
 
         db.add(newDhcpObject)
         db.commit()

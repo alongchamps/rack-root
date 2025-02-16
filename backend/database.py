@@ -46,6 +46,8 @@ class DhcpRange(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True, index=True)
     name: str
     description: Optional[str]
+    startIp: str
+    endIp: str
 
 # When the nonproduction test database is in use, drop everything to effectively reset it
 if( sqlite_url.find("localhost:5555", 0) > -1):
