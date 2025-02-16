@@ -24,12 +24,11 @@ def testNewDhcpRange():
         "endIp": "10.0.1.20"
     })
 
-    if response.json() is not None:
-        print(response.json())
-
     assert response.status_code == 201
     assert response.content.find(b"DHCP Test 1") > -1
-    assert response.content.find(b"Description 1") > 1
+    assert response.content.find(b"Description 1") > -1
+    assert response.content.find(b"10.0.1.10") > -1
+    assert response.content.find(b"10.0.1.20") > -1
 
 # make a new DHCP range without a name
 def testNewDhcpRangeWithoutAName():
@@ -44,20 +43,23 @@ def testNewDhcpRangeWithoutAName():
 # make a new DHCP range without a description, this is valid
 def testNewDhcpRangeWithoutDescription():
     response = client.post("/networks/1/dhcp/", json={
-        "name": "DHCP Test 1",
+        "name": "DHCP Test 2",
         "startIp": "10.0.1.50",
         "endIp": "10.0.1.60"
     })
 
     assert response.status_code == 201
-    assert response.content.find(b"DHCP Test 1") > -1
+    assert response.content.find(b"DHCP Test 2") > -1
+    assert response.content.find(b"10.0.1.50") > -1
+    assert response.content.find(b"10.0.1.60") > -1
 
 # read the new DHCP range
 def testGetNewDhcpRange():
-    response = client.get("/networks/1/dhcp/1")
+    response = client.get("/networks/1/dhcp/2")
     assert response.status_code == 200
-    assert response.content.find(b"DHCP Test 1") > -1
-    assert response.content.find(b"Description 1") > 1
+    assert response.content.find(b"DHCP Test 2") > -1
+    assert response.content.find(b"10.0.1.50") > -1
+    assert response.content.find(b"10.0.1.60") > -1
 
 # test deletion, it should return HTTP 204
 def testDeleteDhcpRange():
