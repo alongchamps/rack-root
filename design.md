@@ -1,8 +1,8 @@
+*as of April 2025, I know this doc is out of date. I'll leave it here for now and rewrite it sometime soon.*
+
 # Rack Root Design Document
 
 I'm writing this design doc to give me practice in such a thing and also get my thoughts on digital paper in some structured format. I'll try to keep this in line with what's actually in the code, and we'll see how good I am at that!
-
-
 
 # Data and relationships
 

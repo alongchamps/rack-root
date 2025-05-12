@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "vite": "^6.2.4",
+    "vuetify": "^3.8.0"
+  }
+}

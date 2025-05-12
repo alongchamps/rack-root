@@ -21,6 +21,25 @@ def createIpRecord(subnetId: int, ipAddress: str, db: Session):
 
     return 0
 
+def createIpRange(subnetId: int, db: Session):
+    # get subnet from the database
+    subnetQuery = select(Subnet).where(Subnet.id == subnetId)
+    subnetObject = db.exec(subnetQuery).first()
+
+    # prep our records
+
+    networkObjectForIpam = ip_network("{0}/{1}".format(subnetObject.network, str(subnetObject.subnetMaskBits)))
+    for addr in networkObjectForIpam.hosts():
+        try:
+            db.add(IpRecord(status="Available", ipAddress=addr.compressed, subnetId=subnetId))
+        except:
+            raise HTTPException(status_code=500, detail="iprecords.createIpRange - Issue creating the IP record in the database.")
+
+    db.commit()
+    # db.refresh()
+
+    return 0
+
 def reserveIp(subnetId: int, ipAddress: str, reservationType: str, newDhcpRangeId: int, db: Session):
     query = select(IpRecord).where(IpRecord.subnetId == subnetId).where(IpRecord.ipAddress == ipAddress)
     updatedIpRecord = db.exec(query).first()

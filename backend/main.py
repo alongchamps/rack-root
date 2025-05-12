@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 # imports for different object types
 from .deviceType import readAllDeviceTypes, readDeviceType, createDeviceType, updateDeviceType, deleteDeviceType
-from .dhcpRange import newDhcpRange, readSingleDhcpRange, deleteDhcpRange
+from .dhcpRange import newDhcpRange, readDhcpRangesBySubnet, readSingleDhcpRange, deleteDhcpRange
 from .iprecords import getIpRecords
 from .item import readAllItems, readItem, createItem, updateItem, deleteItem
 from .subnet import readAllSubnets, readSingleSubnet, createSubnet, deleteSubnet, readGateway, setGateway, deleteGateway
@@ -64,7 +64,7 @@ router.add_api_route("/networks/", readAllSubnets, methods=['GET'], response_mod
 router.add_api_route("/networks/{subnetId:int}", readSingleSubnet, methods=['GET'], response_model=SubnetResponse)
 
 # HTTP POST new subnet
-router.add_api_route("/networks/", createSubnet, methods=['POST'], response_model=SubnetCreate, status_code=status.HTTP_201_CREATED)
+router.add_api_route("/networks/", createSubnet, methods=['POST'], response_model=SubnetResponse, status_code=status.HTTP_201_CREATED)
 
 # HTTP DELETE subnet
 router.add_api_route("/networks/{subnetId:int}", deleteSubnet, methods=['DELETE'], status_code=status.HTTP_204_NO_CONTENT)
@@ -77,14 +77,14 @@ router.add_api_route("/networks/{subnetId:int}/gateway/", deleteGateway, methods
 # # # # # # # # # # # # # #
 # routes for handling IPs
 # # # # # # # # # # # # # #
-# this one is shorter because generally, we're working through other endpoints to interact with IPAM data
-
 # get all IPs for a network
 router.add_api_route("/networks/{subnetId:int}/ipam/", getIpRecords, methods=['GET'], response_model=list[IpRecordResponse], status_code=status.HTTP_200_OK)
 
 # # # # # # # # # # # # # # # # # #
 # routes for handling DHCP ranges
 # # # # # # # # # # # # # # # # # #
+# HTTP GET all DHCP ranges off a subnet
+router.add_api_route("/networks/{subnetId:int}/dhcp/", readDhcpRangesBySubnet, methods=['GET'], response_model=list[DhcpResponse], status_code=status.HTTP_200_OK)
 
 # HTTP GET a DHCP range by ID off a subnet
 router.add_api_route("/networks/{subnetId:int}/dhcp/{dhcpId:int}", readSingleDhcpRange, methods=['GET'], response_model=None, status_code=status.HTTP_200_OK)
@@ -96,7 +96,7 @@ router.add_api_route("/networks/{subnetId:int}/dhcp/", newDhcpRange, methods=['P
 router.add_api_route("/networks/{subnetId:int}/dhcp/{dhcpId:int}", deleteDhcpRange, methods=['DELETE'], status_code=status.HTTP_204_NO_CONTENT)
 
 # # # # # # # # # # # # #
-# end HTTP methods here #
+# end HTTP methods here
 # # # # # # # # # # # # #
 
 # add the router and set origins

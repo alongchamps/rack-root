@@ -21,8 +21,8 @@
           },
           body: JSON.stringify(this.form)
         })
-        const newNetwork = await res.json()
-        this.$router.push('/networks/' + newNetwork.id)
+        const newNetwork = await res.json();
+        this.$router.push('/networks/' + newNetwork.id);
       }
     }
   }
@@ -40,10 +40,10 @@
         <v-row class="margin">
           <v-form @submit.prevent="createNewNetwork()">
             <v-text-field v-model="form.name" label="Network name" variant="outlined" width="45em"></v-text-field>
-            <v-text-field v-model="form.vlan" label="VLAN Number" variant="outlined" width="45em"></v-text-field>
+            <v-text-field v-model="form.vlan" label="VLAN Number" type="number" variant="outlined" width="45em"></v-text-field>
             <v-text-field v-model="form.classification" label="Classification" variant="outlined" width="45em"></v-text-field>
             <v-text-field v-model="form.network" label="Network Address (e.g. 192.168.12.0)" variant="outlined" width="45em"></v-text-field>
-            <v-text-field v-model="form.subnetMaskBits" label="Subnet Mask bits (e.g. 24)" variant="outlined" width="45em"></v-text-field>
+            <v-text-field v-model="form.subnetMaskBits" label="Subnet Mask bits (e.g. 24)" type="number" variant="outlined" width="45em"></v-text-field>
             <v-btn class="a-submit-1" prepend-icon="mdi-plus" color="green" type="Submit">Create New Network</v-btn>
           </v-form>
         </v-row>

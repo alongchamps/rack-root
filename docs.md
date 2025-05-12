@@ -66,11 +66,9 @@ pip3 install -r requirements.txt
 The backend for this app will be powered by FastAPI. Essential packages will be installed via requirements.txt.
 
 ## Testing
-I'm using pytest to run the tests for the backend which should allow me to develop more quickly later. My intention is that for every API endpoint, I have a test of some kind that will cover that code. Code coverage might get to 100%, but we'll see.
+I'm using pytest to run the tests for the backend which has already helped me with some refactoring/redesign efforts I discovered as I went along.
 
-In my `pytest.ini` file, I have one directive and that's to set an environmental variable for the databse file name. Since I'm only using a local sqlite database file for this app, I set the environment variable `DATABASE_URL` to be `nonproduction.db` for testing. When I am running via pytest, I drop every piece of data to 'reset' the database without totally deleting and recreating it.
-
-I came about this solution since I can use calls like `os.getenv("DATABASE_URL", "sqlite:///./backend/production.db")` in order to find out what database file I'm using.
+In my `pytest.ini` file, I have one directive and that's to set an environmental variable for the databse connection string. Since I'm using a container for my database, when I'm developing this locally I will use a container I have running in Docker on my local machine with a particular port. When I run this with my "production" data, I look for the environment variable `DATABASE_URL` being set. If that is not set, it will default to `postgresql+psycopg2://postgres:postgres-fastapi@localhost:5432/postgres`.
 
 The pytest command I run looks like this and you can see where I'm importing the pytest.ini file:
 
@@ -78,7 +76,7 @@ The pytest command I run looks like this and you can see where I'm importing the
 pytest --import-mode prepend -c ./backend/tests/pytest.ini -v
 ```
 
-Pytest will automatically search inside the backend/tests directory for any files matching `test*` and inside those python files, any function calls starting with `test*`. I try to use somewhat descriptive names, such as `TestItemThatDoesntExist` or `TestItemCreate` as I'm writing these.
+Pytest will automatically search inside the backend/tests directory for any files matching `test*` and inside those python files, any function calls starting with `test*`. I try to use somewhat descriptive names, such as `TestItemThatDoesntExist` or `TestItemCreate` for my functions.
 
 ## Running the app
 In order for the frontend to talk to the backend, it has to be allowed in the `main.py` app via the CORSMiddleware allowed origins functionality. I specify that `localhost:3000` is allowed and register that to the FastAPI app instance.

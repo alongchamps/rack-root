@@ -24,6 +24,9 @@ def testNewDhcpRange():
         "endIp": "10.0.1.20"
     })
 
+    if response.is_error:
+        print(response.json())
+
     assert response.status_code == 201
     assert response.content.find(b"DHCP Test 1") > -1
     assert response.content.find(b"Description 1") > -1
@@ -107,5 +110,25 @@ def testNewDhcpRangeWrongEndingIp():
         "description": "Description 4",
         "startIp": "10.0.2.10",
         "endIp": "10.0.1.20"
+    })
+    assert response.status_code == 400
+
+# test a new DHCP range with an invalid IP address
+def testNewDhcpRangeInvalidStartingIp():
+    response = client.post("/networks/2/dhcp/", json={
+        "name": "DHCP Test 4",
+        "description": "Description 4",
+        "startIp": "10.2.10",
+        "endIp": "10.0.1.20"
+    })
+    assert response.status_code == 400
+
+# test a new DHCP range with an invalid IP address
+def testNewDhcpRangeInvalidEndingIp():
+    response = client.post("/networks/2/dhcp/", json={
+        "name": "DHCP Test 4",
+        "description": "Description 4",
+        "startIp": "10.0.2.10",
+        "endIp": "10.1.20"
     })
     assert response.status_code == 400

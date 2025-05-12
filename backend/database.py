@@ -33,6 +33,8 @@ class Subnet(SQLModel, table=True):
     network: str
     subnetMaskBits: int
     ipam: list["IpRecord"] | None = Relationship(back_populates="subnet")
+    dhcpRange: list["DhcpRange"] | None = Relationship(back_populates="subnet")
+    dhcpRangeId: int | None = Field(default=None, foreign_key="dhcprange.id")
 
 class IpRecord(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True, index=True)
@@ -44,6 +46,8 @@ class IpRecord(SQLModel, table=True):
 
 class DhcpRange(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True, index=True)
+    subnetId: int | None = Field(default=None, foreign_key="subnet.id")
+    subnet: Optional[Subnet] | None = Relationship(back_populates="dhcpRange")
     name: str
     description: Optional[str]
     startIp: str

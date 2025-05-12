@@ -4,6 +4,12 @@ from .database import DhcpRange, Subnet, IpRecord, getDb
 from .iprecords import reserveIpRangeDhcp, clearIpAddress
 from .validation_dhcpRange import DhcpCreate
 
+def readDhcpRangesBySubnet(subnetId: int, db:Session = Depends(getDb)):
+    query = select(DhcpRange).where(DhcpRange.subnetId == subnetId)
+    results = db.exec(query).all()
+
+    return results
+
 def readSingleDhcpRange(dhcpId: int, db: Session = Depends(getDb)):
     query = select(DhcpRange).where(DhcpRange.id == dhcpId)
     try:

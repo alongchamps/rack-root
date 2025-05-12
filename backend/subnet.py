@@ -3,7 +3,7 @@ from ipaddress import ip_network,ip_address
 from sqlmodel import Session, select
 
 from .database import getDb, Subnet, IpRecord
-from .iprecords import createIpRecord, clearIpAddress
+from .iprecords import createIpRecord, clearIpAddress, createIpRange
 from .validation_iprecord import IpRecordGateway
 
 # get all subnets from the database
@@ -27,8 +27,6 @@ def readSingleSubnet(subnetId: int, db: Session = Depends(getDb)):
 #  (3) and hasn't been defined before
 def createSubnet(subnet: Subnet, db: Session = Depends(getDb)):
     dbSubnet = Subnet(**subnet.model_dump())
-    
-    # 3 data validations before we save the network details to the database
 
     # (1) make sure we got an IP network, if any exception is thrown, we probably have bad data
     # for example, host bits are set (if network = 192.168.12.10 and subnet mask is /24, 
@@ -66,16 +64,18 @@ def createSubnet(subnet: Subnet, db: Session = Depends(getDb)):
     newSubnetQuery = select(Subnet).where(Subnet.network == dbSubnet.network)
     newSubnet = db.exec(newSubnetQuery).first()
 
-    # now make all of the IP records
-    networkObjectForIpam = ip_network("{0}/{1}".format(newSubnet.network, str(newSubnet.subnetMaskBits)))
-    for addr in networkObjectForIpam.hosts():
-        try:
-            createIpRecord(subnetId=newSubnet.id, ipAddress=addr.compressed, db=db)
-        except Exception as e:
-            print(e)
-            raise HTTPException(status_code=400, detail="subnet.createSubnet - issue making IPAM record...")
+    createIpRange(subnetId=newSubnet.id, db=db)
 
-    return newSubnet
+    # now make all of the IP records - old and slow
+    # networkObjectForIpam = ip_network("{0}/{1}".format(newSubnet.network, str(newSubnet.subnetMaskBits)))
+    # for addr in networkObjectForIpam.hosts():
+    #     try:
+    #         createIpRecord(subnetId=newSubnet.id, ipAddress=addr.compressed, db=db)
+    #     except Exception as e:
+    #         print(e)
+    #         raise HTTPException(status_code=400, detail="subnet.createSubnet - issue making IPAM record...")
+
+    return dbSubnet
 
 # delete a single subnet
 def deleteSubnet(subnetId: int, db: Session = Depends(getDb)):

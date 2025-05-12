@@ -11,7 +11,15 @@
         invalidGatewayInput: false,
         totalIps: 0,
         availableIps: 0,
-        dhcpIps: 0
+        dhcpIps: 0,
+        dhcpRanges: [],
+        dhcpRangeHeaders: [
+          { title: 'ID', value: 'id' },
+          { title: 'Name', value: 'name' },
+          { title: 'Description', value: 'description' },
+          { title: 'First IP', value: 'startIp' },
+          { title: 'Last IP', value: 'lastIp' },
+        ]
       }
     },
     methods: {
@@ -32,10 +40,16 @@
         const resGateway = await fetch("http://localhost:8000/networks/" + id + "/gateway/")
 
         if (resGateway.status == 200 ) {
-          const gatewayResult = await resGateway.json()  
+          const gatewayResult = await resGateway.json()
           this.gateway = gatewayResult
           this.form.gateway = gatewayResult.ipAddress
         }
+      },
+      async getDhcpRanges(id) {
+        const res = await fetch("http://localhost:8000/networks/" + id + "/dhcp/")
+        const dhcpResults = await res.json()
+
+        this.dhcpRanges = dhcpResults
       },
       async setGateway() {
 
@@ -66,6 +80,7 @@
     },
     mounted() {
       this.getSingleNetwork(this.$route.params.id)
+      this.getDhcpRanges(this.$route.params.id)
     }
   }
 
@@ -133,9 +148,10 @@
     </v-row>
     <v-row>
       <v-col cols="12" sm="12">
+        <h1>DHCP Ranges</h1>
         <v-sheet class="ma-5 pa-5 text-h5">
-          DHCP Range(s):
-          name, start, end
+          <v-data-table :items="dhcpRanges" :headers="dhcpRangeHeaders" item-key="id">
+          </v-data-table>
         </v-sheet>
       </v-col>
     </v-row>
