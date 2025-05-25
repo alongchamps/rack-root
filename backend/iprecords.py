@@ -1,15 +1,16 @@
 from fastapi import Depends, HTTPException
-from sqlmodel import Session, select
 from .database import getDb, IpRecord, Subnet
 from ipaddress import ip_network, ip_address, summarize_address_range
+from sqlalchemy.orm import sessionmaker
 
 # def getIpRecords(networkId: int, db: Session = Depends(getDb)):
-def getIpRecords(subnetId: int, db: Session = Depends(getDb)):
-    query = select(IpRecord).where(IpRecord.subnetId == subnetId)
-    results = db.exec(query)
+def getIpRecords(subnetId: int, db: sessionmaker = Depends(getDb)):
+    # query = select(IpRecord).where(IpRecord.subnetId == subnetId)
+    # results = db.exec(query)
+    results = db.query(IpRecord).where(IpRecord.subnetId == subnetId).join(Subnet, IpRecord.subnetId == Subnet.id)
     return results
 
-def createIpRecord(subnetId: int, ipAddress: str, db: Session):
+def createIpRecord(subnetId: int, ipAddress: str, db: sessionmaker):
     newIpRecord = IpRecord(status="Available", ipAddress=ipAddress, subnetId=subnetId)
     
     try:
@@ -21,13 +22,14 @@ def createIpRecord(subnetId: int, ipAddress: str, db: Session):
 
     return 0
 
-def createIpRange(subnetId: int, db: Session):
+def createIpRange(subnetId: int, db: sessionmaker):
     # get subnet from the database
-    subnetQuery = select(Subnet).where(Subnet.id == subnetId)
-    subnetObject = db.exec(subnetQuery).first()
+    # subnetQuery = select(Subnet).where(Subnet.id == subnetId)
+    # subnetObject = db.exec(subnetQuery).first()
+
+    subnetObject = db.query(Subnet).where(Subnet.id == subnetId).first()
 
     # prep our records
-
     networkObjectForIpam = ip_network("{0}/{1}".format(subnetObject.network, str(subnetObject.subnetMaskBits)))
     for addr in networkObjectForIpam.hosts():
         try:
@@ -40,9 +42,11 @@ def createIpRange(subnetId: int, db: Session):
 
     return 0
 
-def reserveIp(subnetId: int, ipAddress: str, reservationType: str, newDhcpRangeId: int, db: Session):
-    query = select(IpRecord).where(IpRecord.subnetId == subnetId).where(IpRecord.ipAddress == ipAddress)
-    updatedIpRecord = db.exec(query).first()
+def reserveIp(subnetId: int, ipAddress: str, reservationType: str, newDhcpRangeId: int, db: sessionmaker):
+    # query = select(IpRecord).where(IpRecord.subnetId == subnetId).where(IpRecord.ipAddress == ipAddress)
+    # updatedIpRecord = db.exec(query).first()
+
+    updatedIpRecord = db.query(IpRecord).where(IpRecord.subnetId == subnetId).where(IpRecord.ipAddress == ipAddress).first()
 
     # check that the IP isn't already reserved
     if updatedIpRecord.status != "Available":
@@ -62,22 +66,25 @@ def reserveIp(subnetId: int, ipAddress: str, reservationType: str, newDhcpRangeI
 
     return 0
 
-def reserveIpRangeDhcp(subnetId: int, ipAddressStartId: int, ipAddressEndId: int, newDhcpRangeId: int, db: Session):
+def reserveIpRangeDhcp(subnetId: int, ipAddressStartId: int, ipAddressEndId: int, newDhcpRangeId: int, db: sessionmaker):
     try:
-        firstIpQuery = select(IpRecord).where(IpRecord.id == ipAddressStartId)
-        firstIp = db.exec(firstIpQuery).first()
+        # firstIpQuery = select(IpRecord).where(IpRecord.id == ipAddressStartId)
+        # firstIp = db.exec(firstIpQuery).first()
+        firstIp = db.query(IpRecord).where(IpRecord.id == ipAddressStartId).first()
     except:
         raise HTTPException(status_code=500, detail="iprecords.reserveIpRangeDhcp - Issue finding first IP when reserving for DHCP")
 
     try:
-        lastIpQuery = select(IpRecord).where(IpRecord.id == ipAddressEndId)
-        lastIp = db.exec(lastIpQuery).first()
+        # lastIpQuery = select(IpRecord).where(IpRecord.id == ipAddressEndId)
+        # lastIp = db.exec(lastIpQuery).first()
+        lastIp = db.query(IpRecord).where(IpRecord.id == ipAddressEndId).first()
     except:
         raise HTTPException(status_code=500, detail="iprecords.reserveIpRangeDhcp - Issue finding last IP when reserving for DHCP")
 
     # prepare variables so we can loop over all IPs easily
-    subnetQuery = select(Subnet).where(Subnet.id == subnetId)
-    subnetObject = db.exec(subnetQuery).first()
+    # subnetQuery = select(Subnet).where(Subnet.id == subnetId)
+    # subnetObject = db.exec(subnetQuery).first()
+    subnetObject = db.query(Subnet).where(Subnet.id == subnetId).first()
     firstIpObject = ip_address(firstIp.ipAddress)
     lastIpObject = ip_address(lastIp.ipAddress)
 
@@ -99,9 +106,14 @@ def reserveIpRangeDhcp(subnetId: int, ipAddressStartId: int, ipAddressEndId: int
 
     return 0
 
-def clearIpAddress(subnetId: int, ipAddress: str, db: Session):
-    query = select(IpRecord).where(IpRecord.subnetId == subnetId).where(IpRecord.ipAddress == ipAddress)
-    updatedIpRecord = db.exec(query).first()
+def clearIpAddress(subnetId: int, ipAddress: str, db: sessionmaker):
+    # query = select(IpRecord).where(IpRecord.subnetId == subnetId).where(IpRecord.ipAddress == ipAddress)
+    # updatedIpRecord = db.exec(query).first()
+
+    try:
+        updatedIpRecord = db.query(IpRecord).where(IpRecord.subnetId == subnetId).where(IpRecord.ipAddress == ipAddress).first()
+    except:
+        raise HTTPException(status_code=500, detail="iprecords.clearIpAddress - Issue finding record in the DB")
 
     updatedIpRecord.status = "Available"
 

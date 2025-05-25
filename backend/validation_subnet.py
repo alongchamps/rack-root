@@ -1,19 +1,31 @@
-from sqlmodel import SQLModel
-from typing import List, Optional
-from .database import IpRecord
+from pydantic import BaseModel
+from typing import Optional
 
-class SubnetCreate(SQLModel):
-    name: str
-    vlan: int
-    classification: str
-    network: str
-    subnetMaskBits: int
-
-class SubnetResponse(SQLModel):
+class SubnetResponseOnly(BaseModel):
     id: int
     name: str
     vlan: int
     classification: str
     network: str
     subnetMaskBits: int
-    ipam: Optional[list[IpRecord]] = None
+
+class SubnetCreate(BaseModel):
+    name: str
+    vlan: int
+    classification: str
+    network: str
+    subnetMaskBits: int
+
+# begin classes that have relations to other models
+from .validation_dhcpRange import DhcpResponseOnly
+from .validation_iprecord import IpRecordOnly
+
+class SubnetResponse(BaseModel):
+    id: int
+    name: str
+    vlan: int
+    classification: str
+    network: str
+    subnetMaskBits: int
+    ipam: Optional[list[IpRecordOnly]] = None
+    dhcpRange: Optional[list[DhcpResponseOnly]] = None

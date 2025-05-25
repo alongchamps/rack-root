@@ -1,7 +1,7 @@
 # Import necessary modules and classes
-from datetime import datetime
-from sqlmodel import Column, create_engine, Field, ForeignKey, MetaData, Relationship, Session, SQLModel
-from typing import Optional
+from sqlalchemy import create_engine, ForeignKey, MetaData
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship, Session
+from typing import List, Optional
 import os
 
 # Database setup
@@ -9,82 +9,146 @@ import os
 sqlite_url = os.getenv("DATABASE_URL", "postgresql+psycopg2://postgres:postgres-fastapi@localhost:5432/postgres")
 engine = create_engine(sqlite_url, echo=True)
 
-class DeviceType(SQLModel, table=True):
-    id: int | None = Field(default=None, primary_key=True, index=True)
-    name: str = Field(index=True)
-    itemId: int | None = Field(default=None, foreign_key="item.id")
-    items: list["Item"] | None = Relationship(back_populates="deviceType")
+class Base(DeclarativeBase):
+    pass
 
-class Item(SQLModel, table=True):
-    id: int | None = Field(default=None, primary_key=True, index=True)
-    name: str = Field(index=True)
-    description: Optional[str]
-    serialNumber: Optional[str]
-    notes: Optional[str]
-    purchaseDate: Optional[str]
-    warrantyExpiration: Optional[str]
-    deviceTypeId: int | None = Field(default=None, foreign_key="devicetype.id")
-    deviceType: Optional[DeviceType] | None = Relationship(back_populates="items")
+class DeviceType(Base):
+    __tablename__ = "devicetype"
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    
+    name: Mapped[str]
+    item: Mapped[List["Item"]] = relationship(back_populates="deviceType")
 
-class Subnet(SQLModel, table=True):
-    id: int | None = Field(default=None, primary_key=True, index=True)
-    name: str = Field(index=True)
-    vlan: int
-    classification: str
-    network: str
-    subnetMaskBits: int
-    ipam: list["IpRecord"] | None = Relationship(back_populates="subnet")
-    # dhcpRangeId: int | None = Field(default=None, sa_column=Column(ForeignKey("dhcprange.id", use_alter=True)))
-    dhcpRangeId: int | None = Field(default=None)
-    dhcpRange: list["DhcpRange"] | None = Relationship(back_populates="subnet", cascade_delete=True, sa_relationship_kwargs={"foreign_keys": "dhcprange.id"})
-    # dhcpRange: list["DhcpRange"] | None = Relationship(back_populates="subnet", foreign_keys="subnet.id")
+    class Config:
+        orm_mode = True
 
-class IpRecord(SQLModel, table=True):
-    id: int | None = Field(default=None, primary_key=True, index=True)
-    status: str
-    ipAddress: str
-    # subnetId: int | None = Field(default=None, sa_column=Column(ForeignKey("subnet.id", use_alter=True)))
-    subnetId: int | None = Field(default=None)
-    subnet: Optional[Subnet] | None = Relationship(back_populates="ipam", sa_relationship_kwargs={"foreign_keys": "subnet.id"})
-    # subnet: Optional[Subnet] | None = Relationship(back_populates="ipam", foreign_keys="subnet.id")
-    dhcpRangeId: int | None = Field(default=None, sa_column=Column(ForeignKey("dhcprange.id", use_alter=True)))
+class Item(Base):
+    __tablename__ = "item"
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
 
-class DhcpRange(SQLModel, table=True):
-    id: int | None = Field(default=None, primary_key=True, index=True)
-    # subnetId: int | None = Field(default=None, sa_column=Column(ForeignKey("subnet.id", use_alter=True)))
-    subnetId: int | None = Field(default=None)
-    subnet: Optional[Subnet] | None = Relationship(back_populates="dhcpRange", sa_relationship_kwargs={"foreign_keys": "subnet.id"})
-    # subnet: Optional[Subnet] | None = Relationship(back_populates="dhcpRange")
-    name: str
-    description: Optional[str]
-    startIp: str
-    endIp: str
+    name: Mapped[str]
+    description: Mapped[Optional[str]]
+    serialNumber: Mapped[Optional[str]]
+    notes: Mapped[Optional[str]]
+    purchaseDate: Mapped[Optional[str]]
+    warrantyExpiration: Mapped[Optional[str]]
+    deviceTypeId: Mapped[int] = mapped_column(ForeignKey("devicetype.id", ondelete="CASCADE"))
+    deviceType: Mapped["DeviceType"] = relationship(back_populates="item", foreign_keys=[deviceTypeId])
+
+    class Config:
+        orm_mode = True
+
+class Subnet(Base):
+    __tablename__ = "subnet"
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+
+    name: Mapped[str]
+    vlan: Mapped[int]
+    classification: Mapped[str]
+    network: Mapped[str]
+    subnetMaskBits: Mapped[int]
+    
+    # add in 2 fields - IpRecord
+    ipRecordId: Mapped[Optional[List[int]]] = mapped_column(ForeignKey("iprecord.id"))
+    # ipRecord: Mapped[Optional[List["IpRecord"]]] = relationship(back_populates="subnet", foreign_keys=[ipRecordId])
+    
+    # add in 2 fields - DhcpRange
+    dhcpRangeId: Mapped[Optional[List[int]]] = mapped_column(ForeignKey("dhcprange.id"))
+    # dhcpRange: Mapped[Optional[List["DhcpRange"]]] = relationship(back_populates="subnet", foreign_keys=[dhcpRangeId])
+
+    class Config:
+        orm_mode = True
+
+class IpRecord(Base):
+    __tablename__ = "iprecord"
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    
+    status: Mapped[str]
+    ipAddress: Mapped[str]
+
+    # add in 2 fields - Subnet
+    subnetId: Mapped[int] = mapped_column(ForeignKey("subnet.id", ondelete="CASCADE"))
+    # subnet: Mapped["Subnet"] = relationship(back_populates="ipRecord", foreign_keys=[subnetId])
+
+    # add in 2 fields - DhcpRange
+    dhcpRangeId: Mapped[Optional[int]] = mapped_column(ForeignKey("dhcprange.id"))
+    # dhcpRange: Mapped["DhcpRange"] = relationship(back_populates="ipRecord", foreign_keys=[dhcpRangeId])
+    
+    class Config:
+        orm_mode = True
+
+class DhcpRange(Base):
+    __tablename__ = "dhcprange"
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
+
+    name: Mapped[str]
+    description: Mapped[Optional[str]] = None
+    startIp: Mapped[str]
+    endIp:Mapped[str]
+
+    # add in 2 fields - Subnet
+    subnetId: Mapped[int] = mapped_column(ForeignKey("subnet.id", ondelete="CASCADE"))
+    # subnet: Mapped["Subnet"] = relationship(back_populates="dhcpRange", foreign_keys=[subnetId])
+
+    # add in 2 fields - IpRecord
+    ipRecordId: Mapped[Optional[List[int]]] = mapped_column(ForeignKey("iprecord.id", ondelete="CASCADE"))
+    # ipRecord: Mapped[List["IpRecord"]] = relationship(back_populates="dhcpRange", foreign_keys=[ipRecordId])
+    
+    class Config:
+        orm_mode = True
 
 # When the nonproduction test database is in use, drop everything to effectively empty it
 if( sqlite_url.find("localhost:5555", 0) > -1):
-    # TODO here: drop tables invidiually?
-    # setup database connection
-    md = MetaData()
-    md.reflect(bind=engine)
-
-    tableNames = ["item", "deviceType", "subnet", "iprecord", "dhcprange"]
-
-    for t in tableNames:
-        try:
-            table = md.tables[t]
-            table.drop(engine)
-        except:
-            pass
-
-    # SQLModel.metadata.drop_all(engine)
+    m = MetaData()
+    m.reflect(engine)
+    m.drop_all(engine)
 
 # Create tables
-SQLModel.metadata.create_all(engine)
+Base.metadata.create_all(engine)
 
 # Dependency to get the database session
 def getDb():
-    db = Session(engine)
+    db = Session(bind=engine)
     try:
         yield db
     finally:
-        db.close()
+        pass
+        # db.close()
+
+# https://dbdiagram.io/d
+
+# https://dbml.dbdiagram.io/docs/
+
+
+# Table Subnet {
+#     subnet_id integer [primary key]
+#     name string
+#     vlan integer
+#     classification string
+#     network string
+#     subnetMaskBits integer
+#     ipRecord string
+#     ipRecordId integer
+#     dhcpRangeId integer
+#     dhcpRange string
+# }
+
+# Table IpRecord {
+#     iprecord_id integer [primary key]
+#     status string
+#     ipAddress string
+#     dhcpRangeId integer
+#     subnetId integer
+# }
+
+# Table DhcpRange {
+#     dhcprange_id integer [primary key]
+#     name string
+#     description string
+#     startip string
+#     endip string
+# }
+
+# Ref subnet_ipam: Subnet.ipRecordId < IpRecord.iprecord_id
+# Ref subnet_dhcp: Subnet.dhcpRangeId < DhcpRange.dhcprange_id
+# Ref ipam_dhcp: IpRecord.dhcpRangeId < DhcpRange.dhcprange_id

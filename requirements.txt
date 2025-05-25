@@ -8,3 +8,5 @@ uvicorn
 pytest-env
 sqlmodel
 psycopg2-binary
+Flask
+Flask-SQLAlchemy

@@ -10,12 +10,11 @@ from .item import readAllItems, readItem, createItem, updateItem, deleteItem
 from .subnet import readAllSubnets, readSingleSubnet, createSubnet, deleteSubnet, readGateway, setGateway, deleteGateway
 
 # base database classes and validation classes for FastAPI
-from .database import DeviceType, Item, Subnet
 from .validation_deviceType import DeviceTypeCreate, DeviceTypeResponse, DeviceTypeUpdate
-from .validation_dhcpRange import DhcpCreate, DhcpResponse
-from .validation_iprecord import IpRecordResponse, IpRecordGateway
+from .validation_dhcpRange import DhcpCreate, DhcpResponse, DhcpResponseOnly
+from .validation_iprecord import IpRecordResponse, IpRecordGateway, IpRecordOnly
 from .validation_item import ItemCreate, ItemUpdate, ItemResponse
-from .validation_subnet import SubnetCreate, SubnetResponse
+from .validation_subnet import SubnetCreate, SubnetResponse, SubnetResponseOnly
 
 # FastAPI app instance
 app = FastAPI()
@@ -30,7 +29,7 @@ router.add_api_route("/deviceTypes/", readAllDeviceTypes, methods=['GET'], respo
 router.add_api_route("/deviceTypes/{devId:int}", readDeviceType, methods=['GET'], response_model=DeviceTypeResponse)
 
 # HTTP POST new device type
-router.add_api_route("/deviceTypes/", createDeviceType, methods=['POST'], response_model=DeviceTypeCreate, status_code=status.HTTP_201_CREATED)
+router.add_api_route("/deviceTypes/", createDeviceType, methods=['POST'], response_model=DeviceTypeResponse, status_code=status.HTTP_201_CREATED)
 
 # HTTP PUT update single device type
 router.add_api_route("/deviceTypes/{devId:int}", updateDeviceType, methods=['PUT'], response_model=DeviceTypeUpdate, status_code=status.HTTP_202_ACCEPTED)
@@ -55,16 +54,16 @@ router.add_api_route("/items/{itemId:int}", updateItem, methods=['PATCH'], statu
 # HTTP DELETE a single inventory item
 router.add_api_route("/items/{itemId:int}", deleteItem, methods=['DELETE'], status_code=status.HTTP_204_NO_CONTENT)
 
-# # # # # # # # # # # # # # # # #
-# # routes for handling networks
-# # # # # # # # # # # # # # # # #
+# # # # # # # # # # # # # # # #
+# routes for handling networks
+# # # # # # # # # # # # # # # #
 
 # HTTP GET methods
-router.add_api_route("/networks/", readAllSubnets, methods=['GET'], response_model=list[SubnetResponse])
-router.add_api_route("/networks/{subnetId:int}", readSingleSubnet, methods=['GET'], response_model=SubnetResponse)
+router.add_api_route("/networks/", readAllSubnets, methods=['GET'], response_model=list[SubnetResponseOnly])
+router.add_api_route("/networks/{subnetId:int}", readSingleSubnet, methods=['GET'], response_model=SubnetResponseOnly)
 
 # HTTP POST new subnet
-router.add_api_route("/networks/", createSubnet, methods=['POST'], response_model=SubnetResponse, status_code=status.HTTP_201_CREATED)
+router.add_api_route("/networks/", createSubnet, methods=['POST'], response_model=SubnetResponseOnly, status_code=status.HTTP_201_CREATED)
 
 # HTTP DELETE subnet
 router.add_api_route("/networks/{subnetId:int}", deleteSubnet, methods=['DELETE'], status_code=status.HTTP_204_NO_CONTENT)
@@ -77,14 +76,15 @@ router.add_api_route("/networks/{subnetId:int}/gateway/", deleteGateway, methods
 # # # # # # # # # # # # # #
 # routes for handling IPs
 # # # # # # # # # # # # # #
+
 # get all IPs for a network
-router.add_api_route("/networks/{subnetId:int}/ipam/", getIpRecords, methods=['GET'], response_model=list[IpRecordResponse], status_code=status.HTTP_200_OK)
+router.add_api_route("/networks/{subnetId:int}/ipam/", getIpRecords, methods=['GET'], response_model=list[IpRecordOnly], status_code=status.HTTP_200_OK)
 
 # # # # # # # # # # # # # # # # # #
 # routes for handling DHCP ranges
 # # # # # # # # # # # # # # # # # #
 # HTTP GET all DHCP ranges off a subnet
-router.add_api_route("/networks/{subnetId:int}/dhcp/", readDhcpRangesBySubnet, methods=['GET'], response_model=list[DhcpResponse], status_code=status.HTTP_200_OK)
+router.add_api_route("/networks/{subnetId:int}/dhcp/", readDhcpRangesBySubnet, methods=['GET'], response_model=list[DhcpResponseOnly], status_code=status.HTTP_200_OK)
 
 # HTTP GET a DHCP range by ID off a subnet
 router.add_api_route("/networks/{subnetId:int}/dhcp/{dhcpId:int}", readSingleDhcpRange, methods=['GET'], response_model=None, status_code=status.HTTP_200_OK)

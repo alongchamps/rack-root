@@ -1,10 +1,22 @@
 from datetime import datetime
-from sqlmodel import SQLModel
+from pydantic import BaseModel
 from typing import Optional
 
-from .validation_deviceType import DeviceTypeResponse
+# A copy of ItemResponse but without the reference to device type
+class ItemResponseOnly(BaseModel):
+    id: int
+    name: str
+    description: Optional[str]
+    serialNumber: Optional[str] =  None
+    purchaseDate: Optional[datetime] =  None
+    warrantyExpiration: Optional[datetime] =  None
+    notes: Optional[str] = None
 
-class ItemCreate(SQLModel):
+# begin classes that have relations to other models
+
+from .validation_deviceType import DeviceTypeResponseOnly
+
+class ItemCreate(BaseModel):
     name: str
     description: Optional[str]
     deviceTypeId: int
@@ -12,9 +24,9 @@ class ItemCreate(SQLModel):
     purchaseDate: Optional[datetime] =  None
     warrantyExpiration: Optional[datetime] =  None
     notes: Optional[str] =  None
-    DeviceType: DeviceTypeResponse = None
+    DeviceType: DeviceTypeResponseOnly = None
 
-class ItemUpdate(SQLModel):
+class ItemUpdate(BaseModel):
     name: Optional[str] = None
     description: Optional[str] = None
     deviceTypeId: Optional[int] = None
@@ -22,16 +34,15 @@ class ItemUpdate(SQLModel):
     purchaseDate: Optional[datetime] =  None
     warrantyExpiration: Optional[datetime] =  None
     notes: Optional[str] =  None
-    DeviceType: DeviceTypeResponse = None
+    DeviceType: DeviceTypeResponseOnly = None
 
-class ItemResponse(SQLModel):
+class ItemResponse(BaseModel):
     id: int
     name: str
     description: Optional[str]
-    deviceTypeId: int
-    deviceType: DeviceTypeResponse
     serialNumber: Optional[str] =  None
     purchaseDate: Optional[datetime] =  None
     warrantyExpiration: Optional[datetime] =  None
     notes: Optional[str] = None
-    DeviceType: DeviceTypeResponse = None
+    deviceTypeId: int
+    deviceType: DeviceTypeResponseOnly = None
