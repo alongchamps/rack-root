@@ -1,14 +1,12 @@
 from fastapi import Depends, HTTPException
-from typing import Optional
-from .database import getDb, DeviceType, Item
-from sqlalchemy import select
 from sqlalchemy.orm import Session, sessionmaker
-from .validation_deviceType import DeviceTypeCreate, DeviceTypeUpdate, DeviceTypeResponse
+from typing import Optional
+
+from .database import getDb, DeviceType
+from .validation_deviceType import DeviceTypeCreate, DeviceTypeUpdate
 
 # Get all device types from the database
 def readAllDeviceTypes(db: Session = Depends(getDb)):
-    # query = select(DeviceType)
-    # results = db.exec(query)
     results = db.query(DeviceType)
     return results
 
@@ -36,9 +34,11 @@ def getValidDeviceId( devId: Optional[int] = None, db: sessionmaker = Depends(ge
 # Create a device type in the database
 def createDeviceType(deviceType: DeviceTypeCreate, db: sessionmaker = Depends(getDb)):
     newDeviceType = DeviceType(**deviceType.model_dump())
+
     db.add(newDeviceType)
     db.commit()
     db.refresh(newDeviceType)
+
     return newDeviceType
 
 # Update a device type's name (that's the only field supported by DeviceTypeUpdate)

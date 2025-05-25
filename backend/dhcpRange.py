@@ -1,21 +1,16 @@
 from fastapi import Depends, HTTPException
-from sqlalchemy import select
 from sqlalchemy.orm import sessionmaker
+
 from .database import DhcpRange, Subnet, IpRecord, getDb
 from .iprecords import reserveIpRangeDhcp, clearIpAddress
 from .validation_dhcpRange import DhcpCreate
 
 def readDhcpRangesBySubnet(subnetId: int, db:sessionmaker = Depends(getDb)):
-    # query = select(DhcpRange).where(DhcpRange.subnetId == subnetId)
-    # results = db.exec(query).all()
-
     results = db.query(DhcpRange).where(DhcpRange.subnetId == subnetId)
 
     return results
 
 def readSingleDhcpRange(dhcpId: int, db: sessionmaker = Depends(getDb)):
-    # query = select(DhcpRange).where(DhcpRange.id == dhcpId)
-
     try:
         results = db.query(DhcpRange).where(DhcpRange.id == dhcpId).one()
     except:
@@ -26,26 +21,19 @@ def readSingleDhcpRange(dhcpId: int, db: sessionmaker = Depends(getDb)):
 def newDhcpRange(newDhcpRange:DhcpCreate, subnetId: int, db: sessionmaker = Depends(getDb)):
 
     # make sure both IPs we got in are defined in the table
+    # this is done by looking for a record where we should get one result and if .one() throws an error, we have an issue
     try:
-        # firstIpQuery = select(IpRecord).where(IpRecord.subnetId == subnetId).where(IpRecord.ipAddress == newDhcpRange.startIp)
-        # use .one() at the end of our results so that it will throw an informative error when 0 records are found
-        # firstIp = db.exec(firstIpQuery).one()
         firstIp = db.query(IpRecord).where(IpRecord.subnetId == subnetId).where(IpRecord.ipAddress == newDhcpRange.startIp).one()
     except:
         raise HTTPException(status_code=400, detail="dhcpRange.newDhcpRange - First IP address not found in the database")
     
     try:
-        # lastIpQuery = select(IpRecord).where(IpRecord.subnetId == subnetId).where(IpRecord.ipAddress == newDhcpRange.endIp)
-        # use .one() at the end of our results so that it will throw an informative error when 0 records are found
-        # lastIp = db.exec(lastIpQuery).one()
         lastIp = db.query(IpRecord).where(IpRecord.subnetId == subnetId).where(IpRecord.ipAddress == newDhcpRange.endIp).one()
     except:
         raise HTTPException(status_code=400, detail="dhcpRange.newDhcpRange - Last IP address not found in the database")
     
     # make the record in the database
     try:
-        # newDhcpObject = DhcpRange(name=newDhcpRange.name, description=newDhcpRange.description, startIp=newDhcpRange.startIp, endIp=newDhcpRange.endIp)
-
         newDhcpObject = DhcpRange(**newDhcpRange.model_dump(exclude_unset=True))
         newDhcpObject.subnetId = subnetId
 
@@ -63,25 +51,18 @@ def newDhcpRange(newDhcpRange:DhcpCreate, subnetId: int, db: sessionmaker = Depe
 def deleteDhcpRange(subnetId:int, dhcpId:int, db: sessionmaker = Depends(getDb)):
     # find our subnet, else 404
     try:
-        # subnetQuery = select(Subnet).where(Subnet.id == subnetId)
         # use .one() at the end of our results so that it will throw an informative error when 0 records are found
-        # subnetResults = db.exec(subnetQuery).one()
         subnetResults = db.query(Subnet).where(Subnet.id == subnetId).one()
     except:
         raise HTTPException(status_code=404, detail="dhcpRange.deleteDhcpRange - Provided subnet ID was not found in the database")
 
     # find our dhcpId, else 404
     try:
-        # dhcpRangeQuery = select(DhcpRange).where(DhcpRange.id == dhcpId)
-        # use .one() at the end of our results so that it will throw an informative error when 0 records are found
-        # dhcpResults = db.exec(dhcpRangeQuery).one()
         dhcpResults = db.query(DhcpRange).where(DhcpRange.id == dhcpId).one()
     except:
         raise HTTPException(status_code=404, detail="dhcpRange.deleteDhcpRange - Provided DHCP range ID was not found in this database")
 
     # find all IPs marked as being on this DHCP range (by dhcpRangeId) and delete them
-    # ipQuery = select(IpRecord).where(IpRecord.dhcpRangeId == dhcpId)
-    # ipResults = db.exec(ipQuery)
     ipResults = db.query(IpRecord).where(IpRecord.dhcpRangeId == dhcpId)
 
     for ipToClear in ipResults:

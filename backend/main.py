@@ -10,11 +10,11 @@ from .item import readAllItems, readItem, createItem, updateItem, deleteItem
 from .subnet import readAllSubnets, readSingleSubnet, createSubnet, deleteSubnet, readGateway, setGateway, deleteGateway
 
 # base database classes and validation classes for FastAPI
-from .validation_deviceType import DeviceTypeCreate, DeviceTypeResponse, DeviceTypeUpdate
-from .validation_dhcpRange import DhcpCreate, DhcpResponse, DhcpResponseOnly
-from .validation_iprecord import IpRecordResponse, IpRecordGateway, IpRecordOnly
-from .validation_item import ItemCreate, ItemUpdate, ItemResponse
-from .validation_subnet import SubnetCreate, SubnetResponse, SubnetResponseOnly
+from .validation_deviceType import DeviceTypeResponse, DeviceTypeUpdate
+from .validation_dhcpRange import DhcpCreate, DhcpResponseOnly
+from .validation_iprecord import IpRecordGateway, IpRecordOnly
+from .validation_item import ItemResponse
+from .validation_subnet import SubnetResponseOnly
 
 # FastAPI app instance
 app = FastAPI()

@@ -1,9 +1,9 @@
 from fastapi import Depends, HTTPException
 from ipaddress import ip_network,ip_address
-from sqlalchemy import select
 from sqlalchemy.orm import sessionmaker
+
 from .database import getDb, Subnet, IpRecord
-from .iprecords import createIpRecord, clearIpAddress, createIpRange
+from .iprecords import clearIpAddress, createIpRange
 from .validation_iprecord import IpRecordGateway
 from .validation_subnet import SubnetCreate
 
@@ -66,30 +66,14 @@ def createSubnet(subnet: SubnetCreate, db: sessionmaker = Depends(getDb)):
         raise HTTPException(status_code=400, detail="Issue creating the network in the database.")
     
     # get the database result, especially so we can read the ID
-    # newSubnetQuery = select(Subnet).where(Subnet.network == dbSubnet.network)
-    # newSubnet = db.exec(newSubnetQuery).first()
-
     newSubnet = db.query(Subnet).where(Subnet.network == dbSubnet.network).first()
 
     createIpRange(subnetId=newSubnet.id, db=db)
-
-    # db.refresh(dbSubnet)
-
-    # now make all of the IP records - old and slow
-    # networkObjectForIpam = ip_network("{0}/{1}".format(newSubnet.network, str(newSubnet.subnetMaskBits)))
-    # for addr in networkObjectForIpam.hosts():
-    #     try:
-    #         createIpRecord(subnetId=newSubnet.id, ipAddress=addr.compressed, db=db)
-    #     except Exception as e:
-    #         print(e)
-    #         raise HTTPException(status_code=400, detail="subnet.createSubnet - issue making IPAM record...")
 
     return dbSubnet
 
 # delete a single subnet
 def deleteSubnet(subnetId: int, db: sessionmaker = Depends(getDb)):
-    # query = select(Subnet).where(Subnet.id == subnetId)
-    # results = db.exec(query)
 
     results = db.query(Subnet).where(Subnet.id == subnetId)
 
@@ -107,9 +91,7 @@ def deleteSubnet(subnetId: int, db: sessionmaker = Depends(getDb)):
 
 # find the gateway associated with this subnet, from the IpRecord table, if it exists
 def readGateway(subnetId: int, db: sessionmaker = Depends(getDb)):
-    # query = select(IpRecord).where(IpRecord.subnetId == subnetId).where(IpRecord.status == "Gateway")
     try:
-        # results = db.exec(query).one()
         results = db.query(IpRecord).where(IpRecord.subnetId == subnetId).where(IpRecord.status == "Gateway").one()
     except:
         return None
@@ -121,10 +103,8 @@ def readGateway(subnetId: int, db: sessionmaker = Depends(getDb)):
 # sure the provided gateway is in the network. If no result comes back, the IP / subnet 
 # relationship is wrong. This function call also clears an existing gateway if it is found.
 def setGateway(subnetId: int, incomingGateway: IpRecordGateway, db: sessionmaker = Depends(getDb)):
-    # find our IpRecord
-    # ipRecordQuery = select(IpRecord).where(IpRecord.subnetId == subnetId).where(IpRecord.ipAddress == incomingGateway.gateway)
     try:
-        # ipRecordToupdate = db.exec(ipRecordQuery).one()
+        # find our IpRecord
         ipRecordToUpdate = db.query(IpRecord).where(IpRecord.subnetId == subnetId).where(IpRecord.ipAddress == incomingGateway.gateway).one()
     except:
         raise HTTPException(status_code=500, detail="No matching IP records found. Is that IP on that network?")
@@ -145,9 +125,7 @@ def setGateway(subnetId: int, incomingGateway: IpRecordGateway, db: sessionmaker
 
 # find IP records on subnetId with the status 'Gateway', and change that to 'Available'
 def deleteGateway(subnetId: int, db: sessionmaker = Depends(getDb)):
-    # query = select(IpRecord).where(IpRecord.subnetId == subnetId).where(IpRecord.status == "Gateway")
     try:
-        # results = db.exec(query).one()
         results = db.query(IpRecord).where(IpRecord.subnetId == subnetId).where(IpRecord.status == "Gateway").one()
     except:
         return None

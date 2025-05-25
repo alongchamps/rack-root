@@ -1,9 +1,9 @@
-from fastapi import Depends, HTTPException, Request, status
-from .database import getDb, DeviceType, Item
-from .deviceType import getValidDeviceId
-from sqlalchemy import select
+from fastapi import Depends, HTTPException, status
 from sqlalchemy.orm import sessionmaker
-from .validation_item import ItemCreate, ItemResponse, ItemUpdate
+
+from .database import getDb, Item
+from .deviceType import getValidDeviceId
+from .validation_item import ItemCreate, ItemUpdate
 
 ## Reading items
 def readAllItems(db: sessionmaker = Depends(getDb)):
@@ -25,7 +25,7 @@ def createItem(item: ItemCreate, db: sessionmaker = Depends(getDb)):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST)
 
     newItem = Item(**item.model_dump(exclude_unset=True))
-    # newItem.deviceTypeId = getValidDeviceId(item.deviceTypeId, db)
+    
     db.add(newItem)
     db.commit()
     db.refresh(newItem)
