@@ -9,17 +9,17 @@ from .validation_subnet import SubnetCreate
 
 # get all subnets from the database
 def readAllSubnets(db: Session = Depends(getDb)):
-    with db() as session:
-        results = session.query(Subnet)
+    # with db() as session:
+    results = db.query(Subnet)
     return results
 
 # get data for one subnet
 def readSingleSubnet(subnetId: int, db: Session = Depends(getDb)):
-    with db() as session:
-        results = session.query(Subnet).where(Subnet.id == subnetId).first()
+    # with db() as session:
+    results = db.query(Subnet).where(Subnet.id == subnetId).first()
 
-        if results is None:
-            raise HTTPException(status_code=404, detail="subnet.readSingleSubnet - Item not found")
+    if results is None:
+        raise HTTPException(status_code=404, detail="subnet.readSingleSubnet - Item not found")
 
     return results
 
@@ -28,50 +28,50 @@ def readSingleSubnet(subnetId: int, db: Session = Depends(getDb)):
 #  (2) it doesn't overlap with an existing IP range,
 #  (3) and hasn't been defined before
 def createSubnet(subnet: SubnetCreate, db: Session = Depends(getDb)):
-    with db() as session:
-        dbSubnet = Subnet(**subnet.model_dump(exclude_unset=True))
+    # with db() as session:
+    dbSubnet = Subnet(**subnet.model_dump(exclude_unset=True))
 
-        # (1) make sure we got an IP network, if any exception is thrown, we probably have bad data
-        # for example, host bits are set (if network = 192.168.12.10 and subnet mask is /24, 
-        # the network input really should be 192.168.12.0)
-        try:
-            validateNetwork = ip_network("{0}/{1}".format(dbSubnet.network, str(dbSubnet.subnetMaskBits)))
-        except:
-            raise HTTPException(status_code=400, detail="subnet.createSubnet - Invalid network provided")
+    # (1) make sure we got an IP network, if any exception is thrown, we probably have bad data
+    # for example, host bits are set (if network = 192.168.12.10 and subnet mask is /24, 
+    # the network input really should be 192.168.12.0)
+    try:
+        validateNetwork = ip_network("{0}/{1}".format(dbSubnet.network, str(dbSubnet.subnetMaskBits)))
+    except:
+        raise HTTPException(status_code=400, detail="subnet.createSubnet - Invalid network provided")
 
-        # (2) make sure the new range doesn't overlap with anything we already have
-        # query = select(Subnet)
-        # allNetworks = db.exec(query)
-        
-        allNetworks = session.query(Subnet)
+    # (2) make sure the new range doesn't overlap with anything we already have
+    # query = select(Subnet)
+    # allNetworks = db.exec(query)
+    
+    allNetworks = db.query(Subnet)
 
-        for n in allNetworks:
-            tmpNetwork = ip_network("{0}/{1}".format(n.network, str(n.subnetMaskBits)))
-            if tmpNetwork.overlaps(validateNetwork):
-                raise HTTPException(status_code=400, detail="subnet.createSubnet - Networks must be unique.")
+    for n in allNetworks:
+        tmpNetwork = ip_network("{0}/{1}".format(n.network, str(n.subnetMaskBits)))
+        if tmpNetwork.overlaps(validateNetwork):
+            raise HTTPException(status_code=400, detail="subnet.createSubnet - Networks must be unique.")
 
-        # (3) make sure we don't already have this network defined, this is not covered by (2)
-        # duplicateNetworkQuery = select(Subnet).where(Subnet.network == dbSubnet.network).where(Subnet.subnetMaskBits == dbSubnet.subnetMaskBits)
-        # duplicatedNetworkSearchResults = db.exec(duplicateNetworkQuery)
+    # (3) make sure we don't already have this network defined, this is not covered by (2)
+    # duplicateNetworkQuery = select(Subnet).where(Subnet.network == dbSubnet.network).where(Subnet.subnetMaskBits == dbSubnet.subnetMaskBits)
+    # duplicatedNetworkSearchResults = db.exec(duplicateNetworkQuery)
 
-        duplicatedNetworkSearchResults = session.query(Subnet).where(Subnet.network == dbSubnet.network).where(Subnet.subnetMaskBits == dbSubnet.subnetMaskBits)
+    duplicatedNetworkSearchResults = db.query(Subnet).where(Subnet.network == dbSubnet.network).where(Subnet.subnetMaskBits == dbSubnet.subnetMaskBits)
 
-        # if we have any results here, we have a duplicate
-        for duplicate in duplicatedNetworkSearchResults:
-            raise HTTPException(status_code=400, detail="subnet.createSubnet - This network seems to already exist.")
+    # if we have any results here, we have a duplicate
+    for duplicate in duplicatedNetworkSearchResults:
+        raise HTTPException(status_code=400, detail="subnet.createSubnet - This network seems to already exist.")
 
-        # save the data to the database here
-        try:
-            session.add(dbSubnet)
-            session.commit()
-            session.refresh(dbSubnet)
-        except:
-            raise HTTPException(status_code=400, detail="subnet.createSubnet - Issue creating the network in the database.")
-        
-        # get the database result, especially so we can read the ID
-        newSubnet = session.query(Subnet).where(Subnet.network == dbSubnet.network).first()
+    # save the data to the database here
+    try:
+        db.add(dbSubnet)
+        db.commit()
+        db.refresh(dbSubnet)
+    except:
+        raise HTTPException(status_code=400, detail="subnet.createSubnet - Issue creating the network in the database.")
+    
+    # get the database result, especially so we can read the ID
+    newSubnet = db.query(Subnet).where(Subnet.network == dbSubnet.network).first()
 
-        createIpRange(subnetId=newSubnet.id, db=db)
+    createIpRange(subnetId=newSubnet.id, db=db)
 
     return dbSubnet
 
@@ -96,11 +96,11 @@ def deleteSubnet(subnetId: int, db: Session = Depends(getDb)):
 
 # find the gateway associated with this subnet, from the IpRecord table, if it exists
 def readGateway(subnetId: int, db: Session = Depends(getDb)):
-    with db() as session:
-        try:
-            results = session.query(IpRecord).where(IpRecord.subnetId == subnetId).where(IpRecord.status == "Gateway").one()
-        except:
-            return None
+    # with db() as session:
+    try:
+        results = db.query(IpRecord).where(IpRecord.subnetId == subnetId).where(IpRecord.status == "Gateway").one()
+    except:
+        return None
 
     return results
 
@@ -109,47 +109,47 @@ def readGateway(subnetId: int, db: Session = Depends(getDb)):
 # sure the provided gateway is in the network. If no result comes back, the IP / subnet 
 # relationship is wrong. This function call also clears an existing gateway if it is found.
 def setGateway(subnetId: int, incomingGateway: IpRecordGateway, db: Session = Depends(getDb)):
-    with db() as session:
-        try:
-            # find our IpRecord
-            ipRecordReadOnly = session.query(IpRecord).where(IpRecord.subnetId == subnetId).where(IpRecord.ipAddress == incomingGateway.gateway).one()
-        except:
-            raise HTTPException(status_code=500, detail="subnet.setGateway - No matching IP records found. Is that IP on that network?")
+    # with db() as session:
+    try:
+        # find our IpRecord
+        ipRecordReadOnly = db.query(IpRecord).where(IpRecord.subnetId == subnetId).where(IpRecord.ipAddress == incomingGateway.gateway).one()
+    except:
+        raise HTTPException(status_code=500, detail="subnet.setGateway - No matching IP records found. Is that IP on that network?")
 
-        # clear an existing record, if found
-        try:
-            results = session.query(IpRecord).where(IpRecord.subnetId == subnetId).where(IpRecord.status == "Gateway").one()
-        except:
-            results = None
+    # clear an existing record, if found
+    try:
+        results = db.query(IpRecord).where(IpRecord.subnetId == subnetId).where(IpRecord.status == "Gateway").one()
+    except:
+        results = None
 
-        if results is not None:    
-            # clearIpAddress(subnetId, results.ipAddress, db)
-            clearIpAddress(subnetId, results.ipAddress)
+    if results is not None:    
+        # clearIpAddress(subnetId, results.ipAddress, db)
+        clearIpAddress(subnetId, results.ipAddress)
 
-        # refresh the session and ipRecordToUpdate here
-        ipRecordToUpdate = session.merge(ipRecordReadOnly)
+    # refresh the session and ipRecordToUpdate here
+    ipRecordToUpdate = db.merge(ipRecordReadOnly)
 
-        ipRecordToUpdate.status = "Gateway"
+    ipRecordToUpdate.status = "Gateway"
 
-        try:
-            session.add(ipRecordToUpdate)
-            session.commit()
-            session.refresh(ipRecordToUpdate)
-        except:
-            raise HTTPException(status_code=500, detail="subnet.setGateway - Issue setting the gateway")
+    try:
+        db.add(ipRecordToUpdate)
+        db.commit()
+        db.refresh(ipRecordToUpdate)
+    except:
+        raise HTTPException(status_code=500, detail="subnet.setGateway - Issue setting the gateway")
 
     return incomingGateway
 
 # find IP records on subnetId with the status 'Gateway', and change that to 'Available'
 def deleteGateway(subnetId: int, db: Session = Depends(getDb)):
-    with db() as session:
-        try:
-            results = session.query(IpRecord).where(IpRecord.subnetId == subnetId).where(IpRecord.status == "Gateway").one()
-        except:
-            return None
+    # with db() as session:
+    try:
+        results = db.query(IpRecord).where(IpRecord.subnetId == subnetId).where(IpRecord.status == "Gateway").one()
+    except:
+        return None
 
-        if results is not None:
-            clearIpAddress(subnetId, results.ipAddress, db)
+    if results is not None:
+        clearIpAddress(subnetId, results.ipAddress, db)
 
     return None
 

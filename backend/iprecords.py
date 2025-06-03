@@ -5,37 +5,37 @@ from sqlalchemy.orm import Session
 from .database import getDb, IpRecord, Subnet
 
 def getIpRecords(subnetId: int, db: Session = Depends(getDb)):
-    with db() as session:
-        results = session.query(IpRecord).where(IpRecord.subnetId == subnetId).join(Subnet, IpRecord.subnetId == Subnet.id)
+    # with db() as session:
+    results = db.query(IpRecord).where(IpRecord.subnetId == subnetId).join(Subnet, IpRecord.subnetId == Subnet.id)
     return results
 
 def createIpRecord(subnetId: int, ipAddress: str, db: Session):
-    with db() as session:
-        newIpRecord = IpRecord(status="Available", ipAddress=ipAddress, subnetId=subnetId)
-        
-        try:
-            session.add(newIpRecord)
-            session.commit()
-            session.refresh(newIpRecord)
-        except:
-            raise HTTPException(status_code=500, detail="iprecords.createIpRecord - Issue creating the IP record in the database.")
+    # with db() as session:
+    newIpRecord = IpRecord(status="Available", ipAddress=ipAddress, subnetId=subnetId)
+    
+    try:
+        db.add(newIpRecord)
+        db.commit()
+        db.refresh(newIpRecord)
+    except:
+        raise HTTPException(status_code=500, detail="iprecords.createIpRecord - Issue creating the IP record in the database.")
 
     return 0
 
 def createIpRange(subnetId: int, db: Session):
-    with db() as session:
-        # get subnet from the database
-        subnetObject = session.query(Subnet).where(Subnet.id == subnetId).first()
+    # with db() as session:
+    # get subnet from the database
+    subnetObject = db.query(Subnet).where(Subnet.id == subnetId).first()
 
-        # prep our records
-        networkObjectForIpam = ip_network("{0}/{1}".format(subnetObject.network, str(subnetObject.subnetMaskBits)))
-        for addr in networkObjectForIpam.hosts():
-            try:
-                session.add(IpRecord(status="Available", ipAddress=addr.compressed, subnetId=subnetId))
-            except:
-                raise HTTPException(status_code=500, detail="iprecords.createIpRange - Issue creating the IP record in the database.")
+    # prep our records
+    networkObjectForIpam = ip_network("{0}/{1}".format(subnetObject.network, str(subnetObject.subnetMaskBits)))
+    for addr in networkObjectForIpam.hosts():
+        try:
+            db.add(IpRecord(status="Available", ipAddress=addr.compressed, subnetId=subnetId))
+        except:
+            raise HTTPException(status_code=500, detail="iprecords.createIpRange - Issue creating the IP record in the database.")
 
-        session.commit()
+    db.commit()
 
     return 0
 
@@ -101,22 +101,22 @@ def reserveIpRangeDhcp(subnetId: int, ipAddressStartId: int, ipAddressEndId: int
     return 0
 
 def clearIpAddress(subnetId: int, ipAddress: str, db: Session = Depends(getDb)):
-    with db() as session:
-        try:
-            updatedIpRecord = session.query(IpRecord).where(IpRecord.subnetId == subnetId).where(IpRecord.ipAddress == ipAddress).first()
-        except:
-            raise HTTPException(status_code=501, detail="iprecords.clearIpAddress - Issue finding record in the DB")
+    # with db() as session:
+    try:
+        updatedIpRecord = db.query(IpRecord).where(IpRecord.subnetId == subnetId).where(IpRecord.ipAddress == ipAddress).first()
+    except:
+        raise HTTPException(status_code=501, detail="iprecords.clearIpAddress - Issue finding record in the DB")
 
-        updatedIpRecord.status = "Available"
+    updatedIpRecord.status = "Available"
 
-        if updatedIpRecord.dhcpRangeId is not None:
-            updatedIpRecord.dhcpRangeId = None
+    if updatedIpRecord.dhcpRangeId is not None:
+        updatedIpRecord.dhcpRangeId = None
 
-        try:
-            session.add(updatedIpRecord)
-            session.commit()
-            session.refresh(updatedIpRecord)
-        except:
-            raise HTTPException(status_code=502, detail="iprecords.clearIpAddress - Issue assigning a status to an IP record in the database.")
-        
+    try:
+        db.add(updatedIpRecord)
+        db.commit()
+        db.refresh(updatedIpRecord)
+    except:
+        raise HTTPException(status_code=502, detail="iprecords.clearIpAddress - Issue assigning a status to an IP record in the database.")
+    
     return 0

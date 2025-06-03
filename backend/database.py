@@ -9,6 +9,7 @@ import os
 # look for DATABASE_URL being set by pytest
 sqlite_url = os.getenv("DATABASE_URL", "postgresql+psycopg2://postgres:postgres-fastapi@localhost:5432/postgres")
 engine = create_engine(sqlite_url, pool_size=20, max_overflow=10)
+SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False)
 
 class Base(DeclarativeBase):
     pass
@@ -109,8 +110,11 @@ Base.metadata.create_all(engine)
 
 # Dependency to get the database session
 def getDb():
-    db = sessionmaker(engine)
-    yield db
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
     # db = Session(bind=engine)
     # try:
@@ -128,4 +132,3 @@ def getDb():
 # .join syntax for database queries
 # .join(<remote object type>, <localrecord.remoteId> == <remote object type>.id)
 # example: .join(Subnet, IpRecord.subnetId == Subnet.id)
-
