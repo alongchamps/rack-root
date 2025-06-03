@@ -1,13 +1,14 @@
 # Import necessary modules and classes
+from datetime import datetime
 from sqlalchemy import create_engine, ForeignKey, MetaData
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship, Session
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship, sessionmaker
 from typing import List, Optional
 import os
 
 # Database setup
 # look for DATABASE_URL being set by pytest
 sqlite_url = os.getenv("DATABASE_URL", "postgresql+psycopg2://postgres:postgres-fastapi@localhost:5432/postgres")
-engine = create_engine(sqlite_url, echo=True)
+engine = create_engine(sqlite_url, pool_size=20, max_overflow=10)
 
 class Base(DeclarativeBase):
     pass
@@ -17,7 +18,7 @@ class DeviceType(Base):
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
     
     name: Mapped[str]
-    item: Mapped[List["Item"]] = relationship(back_populates="deviceType")
+    item: Mapped[Optional[List["Item"]]] = relationship(back_populates="deviceType", lazy="joined")
 
     class Config:
         orm_mode = True
@@ -30,10 +31,10 @@ class Item(Base):
     description: Mapped[Optional[str]]
     serialNumber: Mapped[Optional[str]]
     notes: Mapped[Optional[str]]
-    purchaseDate: Mapped[Optional[str]]
-    warrantyExpiration: Mapped[Optional[str]]
+    purchaseDate: Mapped[Optional[datetime]]
+    warrantyExpiration: Mapped[Optional[datetime]]
     deviceTypeId: Mapped[int] = mapped_column(ForeignKey("devicetype.id", ondelete="CASCADE"))
-    deviceType: Mapped["DeviceType"] = relationship(back_populates="item", foreign_keys=[deviceTypeId])
+    deviceType: Mapped["DeviceType"] = relationship(back_populates="item", foreign_keys=[deviceTypeId], lazy="joined")
 
     class Config:
         orm_mode = True
@@ -108,47 +109,23 @@ Base.metadata.create_all(engine)
 
 # Dependency to get the database session
 def getDb():
-    db = Session(bind=engine)
-    try:
-        yield db
-    finally:
-        pass
-        # db.close()
+    db = sessionmaker(engine)
+    yield db
 
-# https://dbdiagram.io/d
+    # db = Session(bind=engine)
+    # try:
+    #     yield db
+    # finally:
+    #     db.close()
 
-# https://dbml.dbdiagram.io/docs/
+# TODO: fix all references to getDb and replace them with this syntax:
+# Session = sessionmaker(some_engine)
 
+# with Session.begin() as session:
+#     session.add(some_object)
 
-# Table Subnet {
-#     subnet_id integer [primary key]
-#     name string
-#     vlan integer
-#     classification string
-#     network string
-#     subnetMaskBits integer
-#     ipRecord string
-#     ipRecordId integer
-#     dhcpRangeId integer
-#     dhcpRange string
-# }
+# Notes
+# .join syntax for database queries
+# .join(<remote object type>, <localrecord.remoteId> == <remote object type>.id)
+# example: .join(Subnet, IpRecord.subnetId == Subnet.id)
 
-# Table IpRecord {
-#     iprecord_id integer [primary key]
-#     status string
-#     ipAddress string
-#     dhcpRangeId integer
-#     subnetId integer
-# }
-
-# Table DhcpRange {
-#     dhcprange_id integer [primary key]
-#     name string
-#     description string
-#     startip string
-#     endip string
-# }
-
-# Ref subnet_ipam: Subnet.ipRecordId < IpRecord.iprecord_id
-# Ref subnet_dhcp: Subnet.dhcpRangeId < DhcpRange.dhcprange_id
-# Ref ipam_dhcp: IpRecord.dhcpRangeId < DhcpRange.dhcprange_id

@@ -18,4 +18,4 @@ from .validation_item import ItemResponseOnly
 class DeviceTypeResponse(BaseModel):
     id: int
     name: str
-    item: list[ItemResponseOnly]
+    item: Optional[list[ItemResponseOnly]]

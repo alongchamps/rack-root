@@ -1,5 +1,5 @@
 <script setup>
-  import { useDate } from 'vuetify'
+  // import { useDate } from 'vuetify'
 
   // const purchaseDate = useDateFormat(purchaseDate, 'YYYYMMDD')
   // const warrantyExpiration = useDateFormat(warrantyExpiration, 'YYYYMMDD')
