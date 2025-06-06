@@ -5,12 +5,10 @@ from sqlalchemy.orm import Session
 from .database import getDb, IpRecord, Subnet
 
 def getIpRecords(subnetId: int, db: Session = Depends(getDb)):
-    # with db() as session:
     results = db.query(IpRecord).where(IpRecord.subnetId == subnetId).join(Subnet, IpRecord.subnetId == Subnet.id)
     return results
 
 def createIpRecord(subnetId: int, ipAddress: str, db: Session):
-    # with db() as session:
     newIpRecord = IpRecord(status="Available", ipAddress=ipAddress, subnetId=subnetId)
     
     try:
@@ -23,7 +21,6 @@ def createIpRecord(subnetId: int, ipAddress: str, db: Session):
     return 0
 
 def createIpRange(subnetId: int, db: Session):
-    # with db() as session:
     # get subnet from the database
     subnetObject = db.query(Subnet).where(Subnet.id == subnetId).first()
 
@@ -41,7 +38,6 @@ def createIpRange(subnetId: int, db: Session):
 
 def reserveIp(subnetId: int, ipAddress: str, reservationType: str, newDhcpRangeId: int, db: Session):
 
-    # with db() as session:
     updatedIpRecord = db.query(IpRecord).where(IpRecord.subnetId == subnetId).where(IpRecord.ipAddress == ipAddress).first()
 
     # check that the IP isn't already reserved
@@ -64,7 +60,6 @@ def reserveIp(subnetId: int, ipAddress: str, reservationType: str, newDhcpRangeI
 
 def reserveIpRangeDhcp(subnetId: int, ipAddressStartId: int, ipAddressEndId: int, newDhcpRangeId: int, db: Session):
 
-    # with db() as session:
     try:
         firstIp = db.query(IpRecord).where(IpRecord.id == ipAddressStartId).first()
     except:
@@ -80,28 +75,17 @@ def reserveIpRangeDhcp(subnetId: int, ipAddressStartId: int, ipAddressEndId: int
     firstIpObject = ip_address(firstIp.ipAddress)
     lastIpObject = ip_address(lastIp.ipAddress)
 
-    # TODO: refactor this so we summarize an IP range for a given subnet
-    # then I can loop over all IPs in those networks^* and mark them as reserved.
-    # I *think* this will be a little more performant.
-    #
-    # ^* when I call the ip_address -> summarize IP range, it returns an array of network objects
-    # for example 10.0.1.10/28, 10.0.1.14/28, 10.0.1.18/32
-
     # use ip_network to find all hosts
     networkObjectForDhcp = ip_network("{0}/{1}".format(subnetObject.network, str(subnetObject.subnetMaskBits)))
     for addr in networkObjectForDhcp.hosts():
         
         # if our IP is in the range of firstIp..lastIp, mark it as DHCP
         if addr >= firstIpObject and addr <= lastIpObject:
-            # reserveIp(subnetId=subnetId, ipAddress=addr.compressed, reservationType="DHCP", newDhcpRangeId=newDhcpRangeId, db=db)
             reserveIp(subnetId=subnetId, ipAddress=addr.compressed, reservationType="DHCP", newDhcpRangeId=newDhcpRangeId, db=db)
-
-    # now that our IPs are all marked as assigned, make the DHCP reservation 
 
     return 0
 
 def clearIpAddress(subnetId: int, ipAddress: str, db: Session = Depends(getDb)):
-    # with db() as session:
     try:
         updatedIpRecord = db.query(IpRecord).where(IpRecord.subnetId == subnetId).where(IpRecord.ipAddress == ipAddress).first()
     except:

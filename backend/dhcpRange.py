@@ -6,13 +6,11 @@ from .iprecords import reserveIpRangeDhcp, clearIpAddress
 from .validation_dhcpRange import DhcpCreate
 
 def readDhcpRangesBySubnet(subnetId: int, db: Session = Depends(getDb)):
-    # with db() as session:
     results = db.query(DhcpRange).where(DhcpRange.subnetId == subnetId)
 
     return results
 
 def readSingleDhcpRange(dhcpId: int, db: Session = Depends(getDb)):
-    # with db() as session:
     try:
         results = db.query(DhcpRange).where(DhcpRange.id == dhcpId).one()
     except:
@@ -22,7 +20,6 @@ def readSingleDhcpRange(dhcpId: int, db: Session = Depends(getDb)):
 
 def newDhcpRange(newDhcpRange:DhcpCreate, subnetId: int, db: Session = Depends(getDb)):
 
-    # with db() as session:
     # make sure both IPs we got in are defined in the table
     # this is done by looking for a record where we should get one result and if .one() throws an error, we have an issue
     try:
@@ -50,7 +47,6 @@ def newDhcpRange(newDhcpRange:DhcpCreate, subnetId: int, db: Session = Depends(g
     lastIp2 = db.merge(lastIp)
 
     # now that the record is created, reserve all of the IPs
-    # reserveIpRangeDhcp(subnetId=subnetId, ipAddressStartId=firstIp.id, ipAddressEndId=lastIp.id, newDhcpRangeId=newDhcpObject.id, db=db)
     reserveIpRangeDhcp(subnetId=subnetId, ipAddressStartId=firstIp2.id, ipAddressEndId=lastIp2.id, newDhcpRangeId=newDhcpObject.id, db=db)
 
     # call session.merge to refresh our references to newDhcpObject and return it all in one
@@ -58,7 +54,6 @@ def newDhcpRange(newDhcpRange:DhcpCreate, subnetId: int, db: Session = Depends(g
 
 def deleteDhcpRange(subnetId:int, dhcpId:int, db: Session = Depends(getDb)):
 
-    # with db() as session:
     # find our subnet, else 404
     try:
         # use .one() at the end of our results so that it will throw an informative error when 0 records are found

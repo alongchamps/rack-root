@@ -7,12 +7,10 @@ from .validation_item import ItemCreate, ItemUpdate
 
 ## Reading items
 def readAllItems(db: Session = Depends(getDb)):
-    # with db() as session:
     results = db.query(Item)
     return results
 
 def readItem(itemId: int, db: Session = Depends(getDb)):
-    # with db() as session:
     results = db.query(Item).where(Item.id == itemId).first()
 
     if results is None:
@@ -22,7 +20,6 @@ def readItem(itemId: int, db: Session = Depends(getDb)):
 
 ## Creating items
 def createItem(item: ItemCreate, db: Session = Depends(getDb)):
-    # with db() as session:
     try:
         testDeviceId = getValidDeviceId(item.deviceTypeId, db)
     except:
@@ -39,7 +36,6 @@ def createItem(item: ItemCreate, db: Session = Depends(getDb)):
 ## Updating items
 def updateItem(itemId: int, item: ItemUpdate, db: Session = Depends(getDb)):
 
-    # with db() as session:
     # make sure we're getting a valid device ID, if provided
     if item.deviceTypeId != None:
         item.deviceTypeId = getValidDeviceId(item.deviceTypeId, db)
@@ -60,7 +56,6 @@ def updateItem(itemId: int, item: ItemUpdate, db: Session = Depends(getDb)):
 
 ## Deleting items
 def deleteItem(itemId: int, db: Session = Depends(getDb)):
-    # with db() as session:
     results = db.query(Item).where(Item.id == itemId)
     
     try:

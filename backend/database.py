@@ -6,7 +6,7 @@ from typing import List, Optional
 import os
 
 # Database setup
-# look for DATABASE_URL being set by pytest
+# look for DATABASE_URL being set by pytest or other env vars
 sqlite_url = os.getenv("DATABASE_URL", "postgresql+psycopg2://postgres:postgres-fastapi@localhost:5432/postgres")
 engine = create_engine(sqlite_url, pool_size=20, max_overflow=10)
 SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False)
@@ -115,18 +115,6 @@ def getDb():
         yield db
     finally:
         db.close()
-
-    # db = Session(bind=engine)
-    # try:
-    #     yield db
-    # finally:
-    #     db.close()
-
-# TODO: fix all references to getDb and replace them with this syntax:
-# Session = sessionmaker(some_engine)
-
-# with Session.begin() as session:
-#     session.add(some_object)
 
 # Notes
 # .join syntax for database queries
