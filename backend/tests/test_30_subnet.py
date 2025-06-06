@@ -119,3 +119,19 @@ def testAddingDuplicateNetwork():
         "subnetMaskBits": 24
     })
     assert response.status_code == 400
+
+def testDeleteSubnet():
+    # make a network so we can delete the network
+    # this is expected to come in with an ID of '3'
+    response = client.post("/networks/", json={
+        "name": "Deletion-Test",
+        "vlan": 30,
+        "classification": "delete-me",
+        "network": "10.0.4.0",
+        "subnetMaskBits": 24
+    })
+    assert response.status_code == 201
+
+    # delete network 3
+    response = client.delete("/networks/3")
+    assert response.status_code == 204

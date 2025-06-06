@@ -1,18 +1,21 @@
-from sqlmodel import SQLModel
+from pydantic import BaseModel
 from typing import Optional
-from .validation_subnet import SubnetResponse
 
-# class IpRecordCreate(SQLModel):
-#     status: str
-#     ipAddress: str
-#     subnetId: int
-
-class IpRecordResponse(SQLModel):
+class IpRecordOnly(BaseModel):
     id: int
     status: str
     ipAddress: str
-    subnetId: Optional[int]
-    subnet: Optional[SubnetResponse]
 
-class IpRecordGateway(SQLModel):
+# begin classes that have relations to other models
+from .validation_dhcpRange import DhcpResponseOnly
+from .validation_subnet import SubnetResponseOnly
+
+class IpRecordResponse(BaseModel):
+    id: int
+    status: str
+    ipAddress: str
+    subnet: Optional[SubnetResponseOnly]
+    dhcpRange: Optional[DhcpResponseOnly] = None
+
+class IpRecordGateway(BaseModel):
     gateway: str

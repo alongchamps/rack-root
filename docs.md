@@ -1,5 +1,4 @@
 # How I Built This Project
-*Or at least how I got started*
 
 Line by line from my terminal, this is how I built this project.
 
@@ -49,7 +48,7 @@ cd frontend
 npm run dev
 ```
 
-And we're up! The Vue app is now running on https://localhost:3000. Check it out ;)
+And we're up! The Vue app is now running on https://localhost:3000. Check it out
 
 # venv
 
@@ -66,9 +65,12 @@ pip3 install -r requirements.txt
 The backend for this app will be powered by FastAPI. Essential packages will be installed via requirements.txt.
 
 ## Testing
-I'm using pytest to run the tests for the backend which has already helped me with some refactoring/redesign efforts I discovered as I went along.
+I'm using pytest to run all of my tests for the backend, which has already helped me with some refactoring/redesign efforts.
 
+### Database connection string
 In my `pytest.ini` file, I have one directive and that's to set an environmental variable for the databse connection string. Since I'm using a container for my database, when I'm developing this locally I will use a container I have running in Docker on my local machine with a particular port. When I run this with my "production" data, I look for the environment variable `DATABASE_URL` being set. If that is not set, it will default to `postgresql+psycopg2://postgres:postgres-fastapi@localhost:5432/postgres`.
+
+If the `DATABASE_URL` environment variable is set in a production deployment, that will take precedence.
 
 The pytest command I run looks like this and you can see where I'm importing the pytest.ini file:
 
@@ -86,5 +88,3 @@ Starting the backend in dev mode will enable file watching for faster developmen
 ```
 fastapi dev backend/main.py
 ```
-
-And with that, our front end is talking to our back end and serving up data.

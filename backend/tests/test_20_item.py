@@ -95,7 +95,7 @@ def testDevTypeDoesntExist():
     response = client.patch("/items/2", json={"deviceTypeId": 4})
     assert response.status_code == 400
 
-
+# ==========================
 
 # def testNewItem3():
 #     response = client.post("/items/", json={"name": "item3","description": "description3"})

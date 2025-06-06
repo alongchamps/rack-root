@@ -1,10 +1,10 @@
 FastAPI
 fastapi[standard]
 pytest
-sqlalchemy
-sqlalchemy.orm
 pydantic
 uvicorn
 pytest-env
 sqlmodel
 psycopg2-binary
+Flask
+Flask-SQLAlchemy
