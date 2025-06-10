@@ -1,3 +1,4 @@
+from devtools import pprint
 from fastapi import Depends, HTTPException
 from ipaddress import ip_network, ip_address
 from sqlalchemy.orm import Session
@@ -5,7 +6,8 @@ from sqlalchemy.orm import Session
 from .database import getDb, IpRecord, Subnet
 
 def getIpRecords(subnetId: int, db: Session = Depends(getDb)):
-    results = db.query(IpRecord).where(IpRecord.subnetId == subnetId).join(Subnet, IpRecord.subnetId == Subnet.id)
+    results = db.query(IpRecord).where(IpRecord.subnetId == subnetId)
+    # results = db.query(IpRecord).where(IpRecord.subnetId == subnetId).join(Subnet, IpRecord.subnetId == Subnet.id)
     return results
 
 def createIpRecord(subnetId: int, ipAddress: str, db: Session):
@@ -20,19 +22,18 @@ def createIpRecord(subnetId: int, ipAddress: str, db: Session):
 
     return 0
 
-def createIpRange(subnetId: int, db: Session):
-    # get subnet from the database
-    subnetObject = db.query(Subnet).where(Subnet.id == subnetId).first()
+# def createIpRange(subnetId: int, db: Session = Depends(getDb)):
+def createIpRange(subnet: Subnet, db: Session):
 
     # prep our records
-    networkObjectForIpam = ip_network("{0}/{1}".format(subnetObject.network, str(subnetObject.subnetMaskBits)))
+    networkObjectForIpam = ip_network("{0}/{1}".format(subnet.network, str(subnet.subnetMaskBits)))
     for addr in networkObjectForIpam.hosts():
         try:
-            db.add(IpRecord(status="Available", ipAddress=addr.compressed, subnetId=subnetId))
+            db.add(IpRecord(status="Available", ipAddress=addr.compressed, subnetId=subnet.id))
         except:
             raise HTTPException(status_code=500, detail="iprecords.createIpRange - Issue creating the IP record in the database.")
 
-    db.commit()
+    db.flush()
 
     return 0
 
@@ -89,7 +90,7 @@ def clearIpAddress(subnetId: int, ipAddress: str, db: Session = Depends(getDb)):
     try:
         updatedIpRecord = db.query(IpRecord).where(IpRecord.subnetId == subnetId).where(IpRecord.ipAddress == ipAddress).first()
     except:
-        raise HTTPException(status_code=501, detail="iprecords.clearIpAddress - Issue finding record in the DB")
+        raise HTTPException(status_code=500, detail="iprecords.clearIpAddress - Issue finding record in the DB")
 
     updatedIpRecord.status = "Available"
 
@@ -101,6 +102,6 @@ def clearIpAddress(subnetId: int, ipAddress: str, db: Session = Depends(getDb)):
         db.commit()
         db.refresh(updatedIpRecord)
     except:
-        raise HTTPException(status_code=502, detail="iprecords.clearIpAddress - Issue assigning a status to an IP record in the database.")
+        raise HTTPException(status_code=500, detail="iprecords.clearIpAddress - Issue assigning a status to an IP record in the database.")
     
     return 0

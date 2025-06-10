@@ -27,5 +27,5 @@ class SubnetResponse(BaseModel):
     classification: str
     network: str
     subnetMaskBits: int
-    ipam: Optional[list[IpRecordOnly]] = None
+    ipRecord: Optional[list[IpRecordOnly]]
     dhcpRange: Optional[list[DhcpResponseOnly]] = None

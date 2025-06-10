@@ -23,8 +23,8 @@ def testNewItem():
         "description": "testDesc1",
         "deviceTypeId": 2,
         "serialNumber": "FOOB4R",
-        "purchaseDate": "1970-01-01",
-        "warrantyExpiration": "1971-01-01",
+        "purchaseDate": "1970-06-03T04:00:00.000Z",
+        "warrantyExpiration": "1971-06-03T04:00:00.000Z",
         "notes": "notes test"
         })
     assert response.status_code == 201

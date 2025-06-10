@@ -1,4 +1,5 @@
 from fastapi import Depends, HTTPException
+from sqlalchemy import asc
 from sqlalchemy.orm import Session
 from typing import Optional
 
@@ -7,7 +8,7 @@ from .validation_deviceType import DeviceTypeCreate, DeviceTypeUpdate
 
 # Get all device types from the database
 def readAllDeviceTypes(db: Session = Depends(getDb)):
-    results = db.query(DeviceType)        
+    results = db.query(DeviceType).order_by(asc(DeviceType.name))
 
     return results
 

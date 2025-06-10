@@ -1,11 +1,15 @@
+from devtools import pprint
 from fastapi import Depends, HTTPException
 from ipaddress import ip_network,ip_address
-from sqlalchemy.orm import Session
+from sqlalchemy import inspect
+from sqlalchemy.orm import Session, selectinload, joinedload, lazyload
 
 from .database import getDb, Subnet, IpRecord
 from .iprecords import clearIpAddress, createIpRange
 from .validation_iprecord import IpRecordGateway
 from .validation_subnet import SubnetCreate
+
+import traceback
 
 # get all subnets from the database
 def readAllSubnets(db: Session = Depends(getDb)):
@@ -14,8 +18,12 @@ def readAllSubnets(db: Session = Depends(getDb)):
 
 # get data for one subnet
 def readSingleSubnet(subnetId: int, db: Session = Depends(getDb)):
-    results = db.query(Subnet).where(Subnet.id == subnetId).first()
-
+    # results = db.query(Subnet).where(Subnet.id == subnetId).first()
+    # results = db.query(Subnet).join(Subnet.ipRecord).where(Subnet.id == subnetId).first()
+    results = db.query(Subnet).options(joinedload(Subnet.ipRecord)).where(Subnet.id == subnetId).first()
+    # results = db.query(Subnet).options(joinedload(IpRecord)).where(Subnet.id == subnetId).first()
+    # results = db.query(Subnet).options(selectinload(Subnet.ipRecord)).where(Subnet.id == subnetId).first()
+    
     if results is None:
         raise HTTPException(status_code=404, detail="subnet.readSingleSubnet - Item not found")
 
@@ -27,7 +35,10 @@ def readSingleSubnet(subnetId: int, db: Session = Depends(getDb)):
 #  (3) and hasn't been defined before
 def createSubnet(subnet: SubnetCreate, db: Session = Depends(getDb)):
     dbSubnet = Subnet(**subnet.model_dump(exclude_unset=True))
+    network = dbSubnet.network
 
+    # pprint(dbSubnet)
+    
     # (1) make sure we got an IP network, if any exception is thrown, we probably have bad data
     # for example, host bits are set (if network = 192.168.12.10 and subnet mask is /24, 
     # the network input really should be 192.168.12.0)
@@ -52,17 +63,16 @@ def createSubnet(subnet: SubnetCreate, db: Session = Depends(getDb)):
         raise HTTPException(status_code=400, detail="subnet.createSubnet - This network seems to already exist.")
 
     # save the data to the database here
-    try:
-        db.add(dbSubnet)
-        db.commit()
-        db.refresh(dbSubnet)
-    except:
-        raise HTTPException(status_code=400, detail="subnet.createSubnet - Issue creating the network in the database.")
-    
-    # get the database result, especially so we can read the ID
-    newSubnet = db.query(Subnet).where(Subnet.network == dbSubnet.network).first()
+    db.add(dbSubnet)
+    db.flush()
 
-    createIpRange(subnetId=newSubnet.id, db=db)
+    try:
+        createIpRange(subnet=dbSubnet, db=db)
+    except:
+        raise HTTPException(status_code=400, detail="subnet.createSubnet - Issue allocating all IPs")
+
+    db.commit()
+    db.refresh(dbSubnet)
 
     return dbSubnet
 

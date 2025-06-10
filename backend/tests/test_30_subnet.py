@@ -21,6 +21,8 @@ def testGetFirstSubnet():
     assert response.content.find(b"class-Int") > -1
     assert response.content.find(b"10.0.1.0") > -1
     assert response.content.find(b"24") > -1
+    assert response.content.find(b"10.0.1.1") > -1
+    assert response.content.find(b"10.0.1.254") > -1
 
 def testGetNonExistentSubnet():
     response = client.get("/networks/2982982")

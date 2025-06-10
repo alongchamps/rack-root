@@ -14,7 +14,7 @@ from .validation_deviceType import DeviceTypeResponse, DeviceTypeUpdate
 from .validation_dhcpRange import DhcpCreate, DhcpResponseOnly
 from .validation_iprecord import IpRecordGateway, IpRecordOnly
 from .validation_item import ItemResponse
-from .validation_subnet import SubnetResponseOnly
+from .validation_subnet import SubnetCreate, SubnetResponse, SubnetResponseOnly
 
 # FastAPI app instance
 app = FastAPI()
@@ -60,10 +60,10 @@ router.add_api_route("/items/{itemId:int}", deleteItem, methods=['DELETE'], stat
 
 # HTTP GET methods
 router.add_api_route("/networks/", readAllSubnets, methods=['GET'], response_model=list[SubnetResponseOnly])
-router.add_api_route("/networks/{subnetId:int}", readSingleSubnet, methods=['GET'], response_model=SubnetResponseOnly)
+router.add_api_route("/networks/{subnetId:int}", readSingleSubnet, methods=['GET'], response_model=SubnetResponse)
 
 # HTTP POST new subnet
-router.add_api_route("/networks/", createSubnet, methods=['POST'], response_model=SubnetResponseOnly, status_code=status.HTTP_201_CREATED)
+router.add_api_route("/networks/", createSubnet, methods=['POST'], response_model=SubnetCreate, status_code=status.HTTP_201_CREATED)
 
 # HTTP DELETE subnet
 router.add_api_route("/networks/{subnetId:int}", deleteSubnet, methods=['DELETE'], status_code=status.HTTP_204_NO_CONTENT)
