@@ -18,12 +18,8 @@ def readAllSubnets(db: Session = Depends(getDb)):
 
 # get data for one subnet
 def readSingleSubnet(subnetId: int, db: Session = Depends(getDb)):
-    # results = db.query(Subnet).where(Subnet.id == subnetId).first()
-    # results = db.query(Subnet).join(Subnet.ipRecord).where(Subnet.id == subnetId).first()
     results = db.query(Subnet).options(joinedload(Subnet.ipRecord)).where(Subnet.id == subnetId).first()
-    # results = db.query(Subnet).options(joinedload(IpRecord)).where(Subnet.id == subnetId).first()
-    # results = db.query(Subnet).options(selectinload(Subnet.ipRecord)).where(Subnet.id == subnetId).first()
-    
+
     if results is None:
         raise HTTPException(status_code=404, detail="subnet.readSingleSubnet - Item not found")
 
@@ -98,7 +94,7 @@ def readGateway(subnetId: int, db: Session = Depends(getDb)):
     try:
         results = db.query(IpRecord).where(IpRecord.subnetId == subnetId).where(IpRecord.status == "Gateway").one()
     except:
-        return None
+        raise HTTPException(status_code=404, detail="subnet.readGateway - No gateway on that network")
 
     return results
 
@@ -107,9 +103,10 @@ def readGateway(subnetId: int, db: Session = Depends(getDb)):
 # sure the provided gateway is in the network. If no result comes back, the IP / subnet 
 # relationship is wrong. This function call also clears an existing gateway if it is found.
 def setGateway(subnetId: int, incomingGateway: IpRecordGateway, db: Session = Depends(getDb)):
+    
     try:
         # find our IpRecord
-        ipRecord = db.query(IpRecord).where(IpRecord.subnetId == subnetId).where(IpRecord.ipAddress == incomingGateway.gateway).one()
+        ipRecord = db.query(IpRecord).where(IpRecord.subnetId == subnetId).where(IpRecord.ipAddress == incomingGateway.ipAddress).one()
     except:
         raise HTTPException(status_code=500, detail="subnet.setGateway - No matching IP records found. Is that IP on that network?")
 
@@ -120,8 +117,7 @@ def setGateway(subnetId: int, incomingGateway: IpRecordGateway, db: Session = De
         results = None
 
     if results is not None:    
-        # clearIpAddress(subnetId, results.ipAddress, db)
-        clearIpAddress(subnetId, results.ipAddress)
+        clearIpAddress(subnetId, results.ipAddress, db)
 
     ipRecord.status = "Gateway"
 
@@ -132,7 +128,7 @@ def setGateway(subnetId: int, incomingGateway: IpRecordGateway, db: Session = De
     except:
         raise HTTPException(status_code=500, detail="subnet.setGateway - Issue setting the gateway")
 
-    return incomingGateway
+    return ipRecord
 
 # find IP records on subnetId with the status 'Gateway', and change that to 'Available'
 def deleteGateway(subnetId: int, db: Session = Depends(getDb)):

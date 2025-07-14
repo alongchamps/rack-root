@@ -48,7 +48,7 @@ router.add_api_route("/items/{itemId:int}", readItem, methods=['GET'], response_
 # HTTP POST create new item
 router.add_api_route("/items/", createItem, methods=['POST'], response_model=ItemResponse, status_code=status.HTTP_201_CREATED)
 
-# HTTP PUT update item
+# HTTP PATCH update item
 router.add_api_route("/items/{itemId:int}", updateItem, methods=['PATCH'], status_code=status.HTTP_202_ACCEPTED)
 
 # HTTP DELETE a single inventory item
@@ -63,13 +63,13 @@ router.add_api_route("/networks/", readAllSubnets, methods=['GET'], response_mod
 router.add_api_route("/networks/{subnetId:int}", readSingleSubnet, methods=['GET'], response_model=SubnetResponse)
 
 # HTTP POST new subnet
-router.add_api_route("/networks/", createSubnet, methods=['POST'], response_model=SubnetCreate, status_code=status.HTTP_201_CREATED)
+router.add_api_route("/networks/", createSubnet, methods=['POST'], response_model=SubnetResponseOnly, status_code=status.HTTP_201_CREATED)
 
 # HTTP DELETE subnet
 router.add_api_route("/networks/{subnetId:int}", deleteSubnet, methods=['DELETE'], status_code=status.HTTP_204_NO_CONTENT)
 
 # gateway related routes
-router.add_api_route("/networks/{subnetId:int}/gateway/", readGateway, methods=['GET'], response_model=None, status_code=status.HTTP_200_OK)
+router.add_api_route("/networks/{subnetId:int}/gateway/", readGateway, methods=['GET'], response_model=IpRecordGateway, status_code=status.HTTP_200_OK)
 router.add_api_route("/networks/{subnetId:int}/gateway/", setGateway, methods=['POST'], response_model=IpRecordGateway, status_code=status.HTTP_201_CREATED)
 router.add_api_route("/networks/{subnetId:int}/gateway/", deleteGateway, methods=['DELETE'], status_code=status.HTTP_204_NO_CONTENT)
 

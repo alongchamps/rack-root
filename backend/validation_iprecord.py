@@ -18,4 +18,4 @@ class IpRecordResponse(BaseModel):
     dhcpRange: Optional[DhcpResponseOnly] = None
 
 class IpRecordGateway(BaseModel):
-    gateway: str
+    ipAddress: str

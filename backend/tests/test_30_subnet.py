@@ -70,7 +70,7 @@ def testGetSecondSubnet():
 
 def testGatewayAddition():
     response = client.post("/networks/2/gateway/", json={
-        "gateway": "10.0.2.253"
+        "ipAddress": "10.0.2.253"
     })
     assert response.status_code == 201
 
@@ -84,11 +84,12 @@ def testGatewayDeletion():
 
 def testGatewayMissing():
     response = client.get("/networks/2/gateway/")
-    assert response.content.find(b"null") > -1
+    assert response.status_code == 404
+    assert response.content.find(b"subnet.readGateway - No gateway on that network") > -1
 
 def testChangingGateway():
     response = client.post("/networks/2/gateway/", json={
-        "gateway": "10.0.2.1"
+        "ipAddress": "10.0.2.1"
     })
     assert response.status_code == 201
 
@@ -104,7 +105,7 @@ def testReadAllSubnets():
 # check that the server does not accept an IP address outside of a network's range
 def testGatewayNotInSubnet():
     response = client.post("/networks/2/gateway/", json={
-        "gateway": "192.168.12.1"
+        "ipAddress": "192.168.12.1"
     })
     assert response.status_code == 500
     

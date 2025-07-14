@@ -7,7 +7,6 @@ from .database import getDb, IpRecord, Subnet
 
 def getIpRecords(subnetId: int, db: Session = Depends(getDb)):
     results = db.query(IpRecord).where(IpRecord.subnetId == subnetId)
-    # results = db.query(IpRecord).where(IpRecord.subnetId == subnetId).join(Subnet, IpRecord.subnetId == Subnet.id)
     return results
 
 def createIpRecord(subnetId: int, ipAddress: str, db: Session):
@@ -86,7 +85,7 @@ def reserveIpRangeDhcp(subnetId: int, ipAddressStartId: int, ipAddressEndId: int
 
     return 0
 
-def clearIpAddress(subnetId: int, ipAddress: str, db: Session = Depends(getDb)):
+def clearIpAddress(subnetId: int, ipAddress: str, db: Session):
     try:
         updatedIpRecord = db.query(IpRecord).where(IpRecord.subnetId == subnetId).where(IpRecord.ipAddress == ipAddress).first()
     except:

@@ -13,6 +13,7 @@ import { routes } from 'vue-router/auto-routes'
 import index from '../pages/index.vue'
 import fourohfour from '../pages/404.vue'
 import settings from '../pages/Settings.vue'
+import searchResults from '../pages/searchResults.vue'
 
 // pages relating to inventory items
 import allItems from '../pages/items/AllItems.vue'
@@ -66,6 +67,17 @@ const router = createRouter({
       path: '/networks/new',
       name: 'NewNetwork',
       component: newNetwork
+    },
+    {
+      path: '/search/:searchText',
+      redirect: to => {
+        return { path: '/search', query: { q: to.params.searchText } }
+      },
+    },
+    {
+      path: '/search',
+      name: 'SearchResults',
+      component: searchResults
     },
     {
       path: '/:path*',

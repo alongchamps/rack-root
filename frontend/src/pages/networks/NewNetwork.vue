@@ -8,7 +8,8 @@
           classification: null,
           network: null,
           subnetMaskBits: null
-        }
+        },
+        invalidNetworkInput: false
       }
     },
     methods: {
@@ -22,7 +23,14 @@
           body: JSON.stringify(this.form)
         })
         const newNetwork = await res.json();
-        this.$router.push('/networks/' + newNetwork.id);
+
+        // upon success, send the user to the new network page
+        if( res.status == 201 ) {
+          this.$router.push('/networks/' + newNetwork.id);
+        } else {
+          // else, render an error message
+          this.invalidNetworkInput = true
+        }
       }
     }
   }
@@ -46,6 +54,9 @@
             <v-text-field v-model="form.subnetMaskBits" label="Subnet Mask bits (e.g. 24)" type="number" variant="outlined" width="45em"></v-text-field>
             <v-btn class="a-submit-1" prepend-icon="mdi-plus" color="green" type="Submit">Create New Network</v-btn>
           </v-form>
+        </v-row>
+        <v-row v-if="invalidNetworkInput">
+          <v-alert class="ma-5" color="red" icon="mdi-alert-circle-outline" type="error" >Invalid input for network, check inputs and try again.</v-alert>
         </v-row>
         <v-card-actions>
           <v-btn class="a-submit-2" prepend-icon="mdi-arrow-left" color="yellow" :to="{ name: 'AllNetworks' }">Back to all networks</v-btn>
