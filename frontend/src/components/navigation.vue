@@ -48,13 +48,7 @@
     methods: {
       search() {
         if( this.searchQuery ) {
-          // this.$router.push('/search/' + this.searchQuery)
-
-          const navigationResult = this.$router.push('/search/' + this.searchQuery)
-
-          if( navigationResult ) {
-            navigationResult.reload()
-          }
+          this.$router.push('/search/' + this.searchQuery)
         }
       }
     }
