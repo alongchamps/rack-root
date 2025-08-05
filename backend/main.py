@@ -7,6 +7,7 @@ from .deviceType import readAllDeviceTypes, readDeviceType, createDeviceType, up
 from .dhcpRange import newDhcpRange, readDhcpRangesBySubnet, readSingleDhcpRange, deleteDhcpRange
 from .iprecords import getIpRecords
 from .item import readAllItems, readItem, createItem, updateItem, deleteItem
+from .search import searchItems # , searchNetworks, searchDhcpRanges
 from .subnet import readAllSubnets, readSingleSubnet, createSubnet, deleteSubnet, readGateway, setGateway, deleteGateway
 
 # base database classes and validation classes for FastAPI
@@ -14,7 +15,7 @@ from .validation_deviceType import DeviceTypeResponse, DeviceTypeUpdate
 from .validation_dhcpRange import DhcpCreate, DhcpResponseOnly
 from .validation_iprecord import IpRecordGateway, IpRecordOnly
 from .validation_item import ItemResponse
-from .validation_subnet import SubnetCreate, SubnetResponse, SubnetResponseOnly
+from .validation_subnet import SubnetResponse, SubnetResponseOnly
 
 # FastAPI app instance
 app = FastAPI()
@@ -83,6 +84,7 @@ router.add_api_route("/networks/{subnetId:int}/ipam/", getIpRecords, methods=['G
 # # # # # # # # # # # # # # # # # #
 # routes for handling DHCP ranges
 # # # # # # # # # # # # # # # # # #
+
 # HTTP GET all DHCP ranges off a subnet
 router.add_api_route("/networks/{subnetId:int}/dhcp/", readDhcpRangesBySubnet, methods=['GET'], response_model=list[DhcpResponseOnly], status_code=status.HTTP_200_OK)
 
@@ -94,6 +96,17 @@ router.add_api_route("/networks/{subnetId:int}/dhcp/", newDhcpRange, methods=['P
 
 # HTTP DELETE DHCP range from a subnet
 router.add_api_route("/networks/{subnetId:int}/dhcp/{dhcpId:int}", deleteDhcpRange, methods=['DELETE'], status_code=status.HTTP_204_NO_CONTENT)
+
+# # # # # # # # # # # # #
+# search routes
+# # # # # # # # # # # # #
+
+# HTTP GET search results
+router.add_api_route("/search/items/{itemSearch:str}", searchItems, methods=['GET'], response_model=list[ItemResponse], status_code=status.HTTP_200_OK)
+# router.add_api_route("/search/networks", searchNetworks, methods=['GET'], response_model=list[SubnetResponse], status_code=status.HTTP_200_OK)
+# router.add_api_route("/search/dhcpRanges", searchDhcpRanges, methods=['GET'], response_model=list[DhcpResponseOnly], status_code=status.HTTP_200_OK)
+
+
 
 # # # # # # # # # # # # #
 # end HTTP methods here

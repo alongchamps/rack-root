@@ -115,7 +115,7 @@
           {{ network.name }}
         </div>
         <div>
-          <v-btn class="ma-6" prepend-icon="mdi-trash-can" color="red" @click="deleteNetwork()">Delete</v-btn>
+          <v-btn class="ma-6" prepend-icon="mdi-trash-can" color="red" @click="deleteNetwork()">Delete Network</v-btn>
         </div>
       </div>  
     </h1>

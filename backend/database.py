@@ -1,9 +1,17 @@
 # Import necessary modules and classes
 from datetime import datetime
-from sqlalchemy import create_engine, ForeignKey, MetaData
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship, sessionmaker
+from sqlalchemy import Column, create_engine, DDL, event, ForeignKey, Index, MetaData
+
+from sqlalchemy.orm import configure_mappers, DeclarativeBase, Mapped, mapped_column, relationship, sessionmaker
+from sqlalchemy_searchable import make_searchable
+
 from typing import List, Optional
 import os
+
+# placeholders, uncomment as needed
+# from sqlalchemy_utils.types.ts_vector import TSVectorType
+from sqlalchemy_utils.types import TSVectorType
+# from sqlalchemy.dialects.postgresql import TSVECTOR
 
 # Database setup
 # look for DATABASE_URL being set by pytest or other env vars
@@ -13,6 +21,8 @@ SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False)
 
 class Base(DeclarativeBase):
     pass
+
+make_searchable(Base.metadata)
 
 class DeviceType(Base):
     __tablename__ = "devicetype"
@@ -25,17 +35,35 @@ class DeviceType(Base):
         orm_mode = True
 
 class Item(Base):
-    __tablename__ = "item"
-    id: Mapped[int] = mapped_column(primary_key=True, index=True)
 
+    __tablename__ = "item"
+
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
     name: Mapped[str]
     description: Mapped[Optional[str]]
-    serialNumber: Mapped[Optional[str]]
+    serial_number: Mapped[Optional[str]]
     notes: Mapped[Optional[str]]
     purchaseDate: Mapped[Optional[datetime]]
     warrantyExpiration: Mapped[Optional[datetime]]
     deviceTypeId: Mapped[int] = mapped_column(ForeignKey("devicetype.id", ondelete="CASCADE"))
     deviceType: Mapped["DeviceType"] = relationship(back_populates="item", foreign_keys=[deviceTypeId], lazy="joined")
+
+    item_search_vector = Column(TSVectorType("name", "description", "serial_number", "notes"))
+    # itemSearchVector = Column(TSVECTOR)
+
+    # itemSearchTrigger = DDL("""
+    #     CREATE TRIGGER item_search_vector_update BEFORE INSERT OR UPDATE
+    #     on item
+    #     FOR EACH ROW EXECUTE PROCEDURE
+    #     ts_vector_update_trigger(itemSearchVector, name, description, serialNumber, notes)
+    #     """)
+
+    __table_args__ = (
+        Index("ix_item_search_vector",
+                "item_search_vector",
+                postgresql_using="gin"
+        ),
+    )
 
     class Config:
         orm_mode = True
@@ -102,14 +130,22 @@ class DhcpRange(Base):
     class Config:
         orm_mode = True
 
+
+
 # When the nonproduction test database is in use, drop everything to effectively empty it
 if( sqlite_url.find("localhost:5555", 0) > -1):
     m = MetaData()
     m.reflect(engine)
     m.drop_all(engine)
+    Base.metadata.drop_all(engine)
 
 # Create tables
+# make_searchable(Base.metadata)
+configure_mappers()
 Base.metadata.create_all(engine)
+
+# event listeners for search triggers
+# event.listen(Base.metadata, "after_create", Item.itemSearchTrigger.execute_if(dialect="postgresql"))
 
 # Dependency to get the database session
 def getDb():

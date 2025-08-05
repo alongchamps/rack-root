@@ -48,7 +48,7 @@
     methods: {
       search() {
         if( this.searchQuery ) {
-          this.$router.push('/search/' + this.searchQuery)
+          this.$router.push('/search?q=' + this.searchQuery)
         }
       }
     }

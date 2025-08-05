@@ -9,3 +9,4 @@ psycopg2-binary
 Flask
 Flask-SQLAlchemy
 devtools
+sqlalchemy_searchable
