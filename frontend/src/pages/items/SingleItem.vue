@@ -46,7 +46,7 @@
 
 <template>
   <navigation />
-  <v-container>
+  <v-container fluid>
     <h1>
       <div style="display:flex; justify-content:space-between">
         <div>
@@ -60,29 +60,29 @@
     </h1>
     <v-row>
       <v-col cols="12" sm="4">
-        <v-sheet class="ma-5 pa-5 text-h5">
+        <v-sheet class="ma-2 pa-5 text-h5">
           <b>Type:</b> {{ this.deviceTypeName }}
         </v-sheet>
       </v-col>
       <v-col cols="12" sm="4">
-        <v-sheet class="ma-5 pa-5 text-h5">
+        <v-sheet class="ma-2 pa-5 text-h5">
           <b>Description:</b> {{ item.description }}
         </v-sheet>
       </v-col>
     </v-row>
     <v-row>
       <v-col cols="12" sm="4">
-        <v-sheet class="ma-5 pa-5 text-h5">
+        <v-sheet class="ma-2 pa-5 text-h5">
           <b>Serial number:</b> {{ item.serialNumber }}
         </v-sheet>
       </v-col>
       <v-col cols="12" sm="4">
-        <v-sheet class="ma-5 pa-5 text-h5">
+        <v-sheet class="ma-2 pa-5 text-h5">
           <b>Purchase Date:</b> {{ this.purchaseDate }}
         </v-sheet>
       </v-col>
       <v-col cols="12" sm="4">
-        <v-sheet class="ma-5 pa-5 text-h5">
+        <v-sheet class="ma-2 pa-5 text-h5">
           <b>Warranty Expiration:</b> {{ this.warrantyExpiration }}
         </v-sheet>
       </v-col>
