@@ -41,7 +41,6 @@
       },
       async getDeviceTypeName( id ) {
         const res = await fetch("http://localhost:8000/deviceTypes/" + id );
-        
       }
     },
     mounted() {

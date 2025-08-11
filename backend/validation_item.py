@@ -7,7 +7,7 @@ class ItemResponseOnly(BaseModel):
     id: int
     name: str
     description: Optional[str]
-    serial_number: Optional[str] =  None
+    serialNumber: Optional[str] =  None
     purchaseDate: Optional[datetime] =  None
     warrantyExpiration: Optional[datetime] =  None
     notes: Optional[str] = None
@@ -20,7 +20,7 @@ class ItemCreate(BaseModel):
     name: str
     description: Optional[str]
     deviceTypeId: int
-    serial_number: Optional[str] =  None
+    serialNumber: Optional[str] =  None
     purchaseDate: Optional[datetime] =  None
     warrantyExpiration: Optional[datetime] =  None
     notes: Optional[str] =  None
@@ -30,7 +30,7 @@ class ItemUpdate(BaseModel):
     name: Optional[str] = None
     description: Optional[str] = None
     deviceTypeId: Optional[int] = None
-    serial_number: Optional[str] =  None
+    serialNumber: Optional[str] =  None
     purchaseDate: Optional[datetime] =  None
     warrantyExpiration: Optional[datetime] =  None
     notes: Optional[str] =  None
@@ -40,7 +40,7 @@ class ItemResponse(BaseModel):
     id: int
     name: str
     description: Optional[str]
-    serial_number: Optional[str] =  None
+    serialNumber: Optional[str] =  None
     purchaseDate: Optional[datetime] =  None
     warrantyExpiration: Optional[datetime] =  None
     notes: Optional[str] = None

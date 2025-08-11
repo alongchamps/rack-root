@@ -4,14 +4,10 @@ from sqlalchemy import Column, create_engine, DDL, event, ForeignKey, Index, Met
 
 from sqlalchemy.orm import configure_mappers, DeclarativeBase, Mapped, mapped_column, relationship, sessionmaker
 from sqlalchemy_searchable import make_searchable
+from sqlalchemy_utils.types import TSVectorType
 
 from typing import List, Optional
 import os
-
-# placeholders, uncomment as needed
-# from sqlalchemy_utils.types.ts_vector import TSVectorType
-from sqlalchemy_utils.types import TSVectorType
-# from sqlalchemy.dialects.postgresql import TSVECTOR
 
 # Database setup
 # look for DATABASE_URL being set by pytest or other env vars
@@ -22,6 +18,8 @@ SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False)
 class Base(DeclarativeBase):
     pass
 
+# call this after the Base class is defined, but before other classes, 
+# in order to make them searchable
 make_searchable(Base.metadata)
 
 class DeviceType(Base):
@@ -41,22 +39,18 @@ class Item(Base):
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
     name: Mapped[str]
     description: Mapped[Optional[str]]
-    serial_number: Mapped[Optional[str]]
+    # serialNumber is renamed for the database since the search vectors work against lowercase names
+    # and serialNumber here is in camel case. I chose not to rename it here since I would need to rewrite
+    # any instance where serialNumber is used, everywhere from the frontend to the backend.
+    serialNumber: Mapped[Optional[str]] = mapped_column(name="serial_number")
     notes: Mapped[Optional[str]]
     purchaseDate: Mapped[Optional[datetime]]
     warrantyExpiration: Mapped[Optional[datetime]]
     deviceTypeId: Mapped[int] = mapped_column(ForeignKey("devicetype.id", ondelete="CASCADE"))
     deviceType: Mapped["DeviceType"] = relationship(back_populates="item", foreign_keys=[deviceTypeId], lazy="joined")
 
+    # define a search vector only for the columns name, description, serial_number, and notes
     item_search_vector = Column(TSVectorType("name", "description", "serial_number", "notes"))
-    # itemSearchVector = Column(TSVECTOR)
-
-    # itemSearchTrigger = DDL("""
-    #     CREATE TRIGGER item_search_vector_update BEFORE INSERT OR UPDATE
-    #     on item
-    #     FOR EACH ROW EXECUTE PROCEDURE
-    #     ts_vector_update_trigger(itemSearchVector, name, description, serialNumber, notes)
-    #     """)
 
     __table_args__ = (
         Index("ix_item_search_vector",

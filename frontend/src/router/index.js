@@ -69,7 +69,11 @@ const router = createRouter({
       component: newNetwork
     },
     {
-      path: '/search/',
+      path: '/search',
+      query: {
+        q: String,
+        name: String
+      },
       name: 'SearchResults',
       component: searchResults
     },

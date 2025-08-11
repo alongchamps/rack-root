@@ -7,15 +7,15 @@ from sqlalchemy_searchable import search
 from .database import getDb, Item
 
 def searchItems(itemSearch: str, db: Session = Depends(getDb)):
-    ts_query = func.plainto_tsquery('english', itemSearch)
+    tsQuery = func.plainto_tsquery('english', itemSearch)
 
-    stmt = (
+    query = (
         select(Item)
-        .where(Item.item_search_vector.op('@@')(ts_query))
-        .order_by(func.ts_rank_cd(Item.item_search_vector, ts_query).desc())
+        .where(Item.item_search_vector.op('@@')(tsQuery))
+        .order_by(func.ts_rank_cd(Item.item_search_vector, tsQuery).desc())
     )
 
-    results = db.execute(stmt).scalars().unique().all()
+    results = db.execute(query).scalars().unique().all()
     return results
 
 # find all items that match the search term

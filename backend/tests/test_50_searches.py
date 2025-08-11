@@ -20,7 +20,7 @@ def testSearchItemNewItem():
         "name": "rG3YAV",
         "description": "search test",
         "deviceTypeId": 2,
-        "serial_number": "g00g13",
+        "serialNumber": "g00g13",
         "purchaseDate": "1970-06-03T04:00:00.000Z",
         "warrantyExpiration": "1971-06-03T04:00:00.000Z",
         "notes": "notes test"
@@ -40,7 +40,7 @@ def testSearchItemNewItem2():
         "name": "asdfghjkl",
         "description": "search test",
         "deviceTypeId": 2,
-        "serial_number": "g00g13",
+        "serialNumber": "g00g13",
         "purchaseDate": "1970-06-03T04:00:00.000Z",
         "warrantyExpiration": "1971-06-03T04:00:00.000Z",
         "notes": "notes test"
@@ -48,7 +48,7 @@ def testSearchItemNewItem2():
     assert response.status_code == 201
 
 def testSearchItemTwoResults():
-    response = client.get("/search/items/search")
+    response = client.get("/search/items/search test")
     assert response.status_code == 200
 
     # look for two results

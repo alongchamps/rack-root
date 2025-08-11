@@ -22,7 +22,7 @@ def testNewItem():
         "name": "testItem1",
         "description": "testDesc1",
         "deviceTypeId": 2,
-        "serial_number": "FOOB4R",
+        "serialNumber": "FOOB4R",
         "purchaseDate": "1970-06-03T04:00:00.000Z",
         "warrantyExpiration": "1971-06-03T04:00:00.000Z",
         "notes": "notes test"
@@ -45,7 +45,7 @@ def testNewItem2():
         "name": "testItem2",
         "description": "testDesc2",
         "deviceTypeId": 2,
-        "serial_number": "B4RGLASS",
+        "serialNumber": "B4RGLASS",
         "purchaseDate": "1972-01-01",
         "warrantyExpiration": "1973-01-01",
         "notes": "notes test 2"
@@ -57,7 +57,7 @@ def testNewItemWrongDevice():
         "name": "testItem3",
         "description": "test description 3",
         "deviceTypeId": 47,
-        "serial_number": "B4RGLASS",
+        "serialNumber": "B4RGLASS",
         "purchaseDate": "1974-01-01",
         "warrantyExpiration": "1975-01-01",
         "notes": "notes test 3"
