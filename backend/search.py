@@ -1,11 +1,16 @@
+# The code in this file effectively just runs the search queries on the database
+# for each of the given types: Item, Subnet, and DhcpRange. Future searches
+# should be added here and called in a similar way from main.py.
+
 from fastapi import Depends
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import func
 from sqlalchemy_searchable import search
 
-from .database import getDb, Item
+from .database import getDb, Item, Subnet, DhcpRange
 
+# Find all Items that match our search query
 def searchItems(itemSearch: str, db: Session = Depends(getDb)):
     tsQuery = func.plainto_tsquery('english', itemSearch)
 
@@ -18,39 +23,39 @@ def searchItems(itemSearch: str, db: Session = Depends(getDb)):
     results = db.execute(query).scalars().unique().all()
     return results
 
-# find all items that match the search term
-# def searchItems(itemSearch: str, db: Session = Depends(getDb)):
+# Find all Networks that match our search query
+def searchNetworks(networkSearch: str, db: Session = Depends(getDb)):
+    tsQuery = func.plainto_tsquery('english', networkSearch)
 
-    # searchQuery = func.to_tsquery(itemSearch)
-    # searchVector = func.to_tsvector("english",
-    #         func.concat_ws(
-    #         ' ',
-    #         Item.name,
-    #         Item.description,
-    #         Item.serialNumber,
-    #         Item.notes
-    #     )
-    # )
+    query = (
+        select(Subnet)
+        .where(Subnet.network_search_vector.op('@@')(tsQuery))
+        .order_by(func.ts_rank_cd(Subnet.network_search_vector, tsQuery).desc())
+    )
 
-    # itemArray = db.query(Item).filter(Item.itemSearchVector.op("@@")(searchQuery)).all()
-    # Article.query.search("Finland").limit(5).all()
-    # results = Videos.query.filter(Video.description.match(term)).all()
-    # itemArray = db.query(Item).filter(Item.itemSearchVector.op("@@")(itemSearch)).all()
+    results = db.execute(query).scalars().unique().all()
+    return results
 
-    # query = search(select(Item), itemSearch)
-    # itemArray = db.scalars(query).all()
+# Find all DHCP ranges that match our search query
+def searchDhcpRanges(dhcpSearch: str, db: Session = Depends(getDb)):
+    tsQuery = func.plainto_tsquery('english', dhcpSearch)
 
-    # return itemArray
+    query = (
+        select(DhcpRange)
+        .where(DhcpRange.dhcp_range_search_vector.op('@@')(tsQuery))
+        .order_by(func.ts_rank_cd(DhcpRange.dhcp_range_search_vector, tsQuery).desc())
+    )
 
-# find all networks that match the search term
-# def searchNetworks():
-#     return 0
+    results = db.execute(query).scalars().unique().all()    
+    return results
 
-# find all dhcp ranges that match the search term
-# def searchDhcpRanges():
-#     return 0
+# TODO
+# Should I have a search function for IP records? They would need to point back to the network
+# details page, but being able to find out where a.b.c.d is used (if anywhere) is useful
+# Side effect: 
 
 
+# The notes below went into my functionality for this feature and I kept it here in case there's something I forgot
 
 # search box functionality
 # - - - - - - - - - - - - 
@@ -83,6 +88,7 @@ def searchItems(itemSearch: str, db: Session = Depends(getDb)):
 #         for items, this should go to the SingleItem.vue page
 #         for network results, this should go to the SingleNetwork.vue page
 #         for DHCP networks, this should go to the SingleNetwork.vue page
+#         for IP addresses, go to SingleNetwork.vue page or a page that renders IP address details?
 
 # testing
 # items

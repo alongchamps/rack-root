@@ -82,6 +82,15 @@ class Subnet(Base):
     dhcpRangeId: Mapped[Optional[List[int]]] = mapped_column(ForeignKey("dhcprange.id"))
     # dhcpRange: Mapped[Optional[List["DhcpRange"]]] = relationship(back_populates="subnet", foreign_keys=[dhcpRangeId])
 
+    network_search_vector = Column(TSVectorType("name", "classification", "network"))
+
+    __table_args__ = (
+        Index("ix_network_search_vector",
+                "network_search_vector",
+                postgresql_using="gin"
+        ),
+    )
+
     class Config:
         orm_mode = True
 
@@ -121,10 +130,17 @@ class DhcpRange(Base):
     ipRecordId: Mapped[Optional[List[int]]] = mapped_column(ForeignKey("iprecord.id", ondelete="CASCADE"))
     # ipRecord: Mapped[List["IpRecord"]] = relationship(back_populates="dhcpRange", foreign_keys=[ipRecordId])
     
+    dhcp_range_search_vector = Column(TSVectorType("name", "description"))
+
+    __table_args__ = (
+        Index("ix_dhcp_range_search_vector",
+                "dhcp_range_search_vector",
+                postgresql_using="gin"
+        ),
+    )
+
     class Config:
         orm_mode = True
-
-
 
 # When the nonproduction test database is in use, drop everything to effectively empty it
 if( sqlite_url.find("localhost:5555", 0) > -1):

@@ -5,10 +5,10 @@
         networks: [],
         headers: [
           { title: 'ID', value: 'id'},
+          { title: 'Name', value: 'name' },
           { title: 'Network', value: 'network'},
           { title: 'VLAN', value: 'vlan'},
           { title: 'Subnet Mask Bits', value: 'subnetMaskBits'},
-          { title: 'Gateway', value: 'gateway'},
           { title: 'Classification', value: 'classification'}
         ]
       }

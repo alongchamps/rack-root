@@ -132,3 +132,12 @@ def testNewDhcpRangeInvalidEndingIp():
         "endIp": "10.1.20"
     })
     assert response.status_code == 400
+
+def testNewDhcpRangeForOtherTests():
+    response = client.post("/networks/1/dhcp/", json={
+        "name": "DHCP Test 5",
+        "description": "Made for search testing",
+        "startIp": "10.0.1.70",
+        "endIp": "10.0.1.80"
+    })
+    assert response.status_code == 201
