@@ -39,29 +39,29 @@
         this.getNetworkSearchResults()
 
         // dhcp range search API call
-        this.getDhcpRangeSearchResults()
+        // this.getDhcpRangeSearchResults()
 
       },
       async getItemSearchResults() {
-        const res = await fetch("http://localhost:8000/search/items/" + this.$route.query.q);
-        const itemsMatchingQuery = await res.json();
+        const resItem = await fetch("http://localhost:8000/search/items/" + this.$route.query.q);
+        const itemsMatchingQuery = await resItem.json();
         this.itemSearchResults = itemsMatchingQuery
       },
       async goToItem(click, row) {
         this.$router.push('/items/' + row.item.id)
       },
       async getNetworkSearchResults() {
-        const res = await fetch("http://localhost:8000/search/networks/" + this.$route.query.q);
-        const networkMatchingQuery = await res.json();
+        const resNetwork = await fetch("http://localhost:8000/search/networks/" + this.$route.query.q);
+        const networkMatchingQuery = await resNetwork.json();
         this.networkSearchResults = networkMatchingQuery
-      },
-      async getDhcpRangeSearchResults() {
-        const res = await fetch("http://localhost:8000/search/dhcpRanges/" + this.$route.query.q);
-        const dhcpSearchMatchingQuery = await res.json();
-        this.dhcpRangeSearchResults = dhcpSearchMatchingQuery
       },
       async goToNetwork(click, row) {
         this.$router.push('/networks/' + row.item.id)
+      },
+      async getDhcpRangeSearchResults() {
+        const resDhcpRange = await fetch("http://localhost:8000/search/dhcpRanges/" + this.$route.query.q);
+        const dhcpSearchMatchingQuery = await resDhcpRange.json();
+        this.dhcpRangeSearchResults = dhcpSearchMatchingQuery
       }
       // , dont think this function getDeviceTypeName is needed...
       // async getDeviceTypeName(id) {
@@ -71,7 +71,7 @@
     mounted() {
       this.getSearchResults(this.$route.query.q)
     }
-  }  
+  }
 </script>
 
 <template>
@@ -82,35 +82,22 @@
     <br />
     You searched for: <b>{{ this.searchResults }}</b>
     
-    <!-- TODO All of these tables will show up iff they have results -->
-    <!-- 
-      if length itemSearchResults > 0:
-        item results table
-    -->
+    <template v-if="itemSearchResults.length != 0">
+      <v-data-table :items="itemSearchResults" :headers="itemSearchResultsHeaders" item-key="id" @click:row=goToItem>
+      </v-data-table>
+      <br />
+    </template>
 
-    <v-data-table :items="itemSearchResults" :headers="itemSearchResultsHeaders" item-key="id" @click:row=goToItem>
-    </v-data-table>
-  
-    <br />
-    
-    <!-- TODO
-      if length networkSearchResults > 0:
-        network results table
-    -->
-    <v-data-table :items="networkSearchResults" :headers="networkSearchResultsHeaders" item-key="id" @click:row=goToNetwork>
-    </v-data-table>
-
-    <br />
-
-    <!--TODO
-      if length dhcpRangeSearchResults > 0:
-        dhcp range results table
-    -->
+    <template v-if="networkSearchResults.length != 0">
+      <v-data-table :items="networkSearchResults" :headers="networkSearchResultsHeaders" item-key="id" @click:row=goToNetwork>
+      </v-data-table>
+      <br />
+    </template>
 
     <!-- The next line is commented out until I have an actual DHCP details page -->
     <!-- <v-data-table :items="dhcpRangeSearchResults" :headers="dhcpRangeSearchResultsHeaders" item-key="id" @click:row=goToDhcpDetailsPage> -->
-    <v-data-table :items="dhcpRangeSearchResults" :headers="dhcpRangeSearchResultsHeaders" item-key="id">      
-    </v-data-table>
+    <!-- <v-data-table :items="dhcpRangeSearchResults" :headers="dhcpRangeSearchResultsHeaders" item-key="id">      
+    </v-data-table> -->
 
   </v-container>
 
