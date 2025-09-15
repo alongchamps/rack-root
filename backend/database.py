@@ -120,7 +120,7 @@ class DhcpRange(Base):
     name: Mapped[str]
     description: Mapped[Optional[str]]
     startIp: Mapped[str]
-    endIp:Mapped[str]
+    endIp: Mapped[str]
 
     # add in 2 fields - Subnet
     subnetId: Mapped[int] = mapped_column(ForeignKey("subnet.id", ondelete="CASCADE"))

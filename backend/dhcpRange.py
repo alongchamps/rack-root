@@ -41,6 +41,8 @@ def newDhcpRange(newDhcpRange:DhcpCreate, subnetId: int, db: Session = Depends(g
         db.commit()
         db.refresh(newDhcpObject)
     except:
+        db.delete(newDhcpObject)
+        db.commit()
         raise HTTPException(status_code=400, detail="dhcpRange.newDhcpRange - Issue creating the DHCP range record in the database")
 
     firstIp2 = db.merge(firstIp)

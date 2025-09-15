@@ -18,8 +18,16 @@
           { title: 'Name', value: 'name' },
           { title: 'Description', value: 'description' },
           { title: 'First IP', value: 'startIp' },
-          { title: 'Last IP', value: 'lastIp' },
-        ]
+          { title: 'Last IP', value: 'endIp' },
+        ],
+        newDhcpRangeDialog: false,
+        invalidDhcpRangeInput: false,
+        newDhcpRangeForm: {
+          name: '',
+          description: '',
+          startIp: '',
+          endIp: ''
+        }
       }
     },
     methods: {
@@ -96,6 +104,30 @@
 
         // send the user back to /networks
         this.$router.push("/networks")
+      },
+      async createDhcpRange() {
+        // send the input to the backend and let that validate whether it's valid
+        const res = await fetch("http://localhost:8000/networks/" + this.network.id + "/dhcp/", {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(this.newDhcpRangeForm)
+        })
+        const newDhcpRange = await res.json()
+
+        if (res.status == 400 || res.status == 500) {
+          // if so, hide the dialog and display an error
+          this.newDhcpRangeDialog = false
+          this.invalidDhcpRangeInput = true
+        } else {          
+          // refresh the data on this page
+          this.getSingleNetwork(this.network.id)
+
+          // hide device dialog and error message, if visible
+          this.newDhcpRangeDialog = false
+          this.invalidDhcpRangeInput = false
+        }
       }
     },
     mounted() {
@@ -176,8 +208,18 @@
     </v-row>
     <v-row>
       <v-col cols="12" sm="12">
-        <h1>DHCP Ranges</h1>
-        <v-sheet class="ma-5 pa-5 text-h5">
+        <div style="display:flex; justify-content:space-between">
+          <div>
+            <h1>DHCP Ranges</h1>
+          </div>
+          <div>
+            <v-btn class="ma-6" prepend-icon="mdi-plus" color="green" @click.stop="newDhcpRangeDialog = true">Add DHCP Range</v-btn>
+          </div>
+        </div>
+        
+        <v-alert v-if="invalidDhcpRangeInput" class="ma-2" color="red" icon="mdi-alert-circle-outline" type="error">Invalid input for DHCP, range not created.</v-alert>
+
+        <v-sheet class="pa-5 text-h5">
           <v-data-table :items="dhcpRanges" :headers="dhcpRangeHeaders" item-key="id">
           </v-data-table>
         </v-sheet>
@@ -198,6 +240,32 @@
               <v-btn form="newGatewayForm" text="Cancel" variant="plain" @click="newGatewayDialog = false"></v-btn>
               <v-btn form="newGatewayForm" text="Apply" variant="tonal" color="primary" type="submit"
                 @click="newGatewayDialog = false"></v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-form>
+      </v-dialog>
+    
+    <!-- This v-dialog is for making new DHCP ranges which will ask for a name, optional description, start IP and end IP -->
+
+      <v-dialog v-model="newDhcpRangeDialog" max-width="750">
+        <v-form @submit.prevent="createDhcpRange()" id="newDhcpRangeForm">
+          <v-card title="Make a new DHCP range">
+            <v-text-field class="mx-5" v-model="newDhcpRangeForm.name" label="Name" clearable></v-text-field>
+            <v-text-field class="mx-5" v-model="newDhcpRangeForm.description" label="Description" clearable></v-text-field>
+            <v-row>
+              <v-col cols="6">
+                <v-text-field class="ml-5" v-model="newDhcpRangeForm.startIp" label="First IP Address" clearable></v-text-field>
+              </v-col>
+              <v-col cols="6">
+                <v-text-field class="mr-5" v-model="newDhcpRangeForm.endIp" label="Last IP Address" clearable></v-text-field>
+              </v-col>
+            </v-row>
+            <v-divider></v-divider>
+            <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-btn form="newDhcpRangeForm" text="Cancel" variant="plain" @click="newDhcpRangeDialog = false"></v-btn>
+              <v-btn form="newDhcpRangeForm" text="Apply" variant="tonal" color="primary" type="submit"
+                @click="newDhcpRangeDialog = false"></v-btn>
             </v-card-actions>
           </v-card>
         </v-form>

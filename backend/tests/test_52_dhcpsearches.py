@@ -39,3 +39,9 @@ def testTwoSearchResultsByName():
     # confirm one results
     jsonData = json.loads(response.content)
     assert len(jsonData) == 2
+
+
+
+# TODO: do I have search that covers the description field?
+
+# TODO: make sure when a bad DHCP range gets created, it doesn't stick around in the database
