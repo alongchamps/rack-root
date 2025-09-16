@@ -85,6 +85,19 @@ def reserveIpRangeDhcp(subnetId: int, ipAddressStartId: int, ipAddressEndId: int
 
     return 0
 
+# for a given network, start, and ending IPs, make sure every record is marked as "Available"
+def checkAllIPsAreAvailable(subnetId: int, ipAddressStartId: int, ipAddressEndId: int, db: Session):
+
+    # find all IPs between the start and end IP addresses, inclusively
+    allIps = db.query(IpRecord).where(IpRecord.subnetId == subnetId).where((IpRecord.id >= ipAddressStartId) & (IpRecord.id <= ipAddressEndId)).all()
+
+    # for anything not available, raise an exception for bad request input
+    for ipRecords in allIps:
+        if ipRecords.status != "Available":
+            raise HTTPException(status_code=400, detail="iprecords.checkAllIpsAreAvailable - invalid input, the IP " + ipRecords.ipAddress + " is already in use")
+
+    return 0
+
 def clearIpAddress(subnetId: int, ipAddress: str, db: Session):
     try:
         updatedIpRecord = db.query(IpRecord).where(IpRecord.subnetId == subnetId).where(IpRecord.ipAddress == ipAddress).first()

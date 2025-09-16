@@ -33,7 +33,7 @@ def testNewDhcpRange():
     assert response.content.find(b"10.0.1.10") > -1
     assert response.content.find(b"10.0.1.20") > -1
 
-# make a new DHCP range without a name
+# make a new DHCP range without a name, should be incorrect
 def testNewDhcpRangeWithoutAName():
     response = client.post("/networks/1/dhcp/", json={
         "description": "non-empty description",
@@ -92,8 +92,9 @@ def testNewDhcpRangeBothIpsWrong():
         print(response.json())
 
     assert response.status_code == 400
+    assert response.content.find(b"First IP address not found") > -1
 
-# test a new DHCP range with wrong starting IP
+# test a new DHCP range with wrong starting IP from another network
 def testNewDhcpRangeWrongStartingIp():
     response = client.post("/networks/2/dhcp/", json={
         "name": "DHCP Test 3",
@@ -102,8 +103,9 @@ def testNewDhcpRangeWrongStartingIp():
         "endIp": "10.0.2.20"
     })
     assert response.status_code == 400
+    assert response.content.find(b"First IP address not found") > -1
 
-# test a new DHCP range with the wrong ending IP
+# test a new DHCP range with the wrong ending IP from another network
 def testNewDhcpRangeWrongEndingIp():
     response = client.post("/networks/2/dhcp/", json={
         "name": "DHCP Test 4",
@@ -112,6 +114,7 @@ def testNewDhcpRangeWrongEndingIp():
         "endIp": "10.0.1.20"
     })
     assert response.status_code == 400
+    assert response.content.find(b"Last IP address not found") > -1
 
 # test a new DHCP range with an invalid IP address
 def testNewDhcpRangeInvalidStartingIp():
@@ -133,6 +136,37 @@ def testNewDhcpRangeInvalidEndingIp():
     })
     assert response.status_code == 400
 
+# test a new DHCP range that overlaps based on the same starting IP
+def testNewDhcpRangeDuplicateStartingIp():
+    response = client.post("/networks/1/dhcp/", json={
+        "name": "DHCP Test 4 - overlapping starting IP",
+        "description": "desc",
+        "startIp": "10.0.1.50",
+        "endIp": "10.0.1.55"
+    })
+    assert response.status_code == 400
+
+# test a new DHCP range that overlaps based on the same ending IP
+def testNewDhcpRangeDuplicateEndingIp():
+    response = client.post("/networks/1/dhcp/", json={
+        "name": "DHCP Test 4 - overlapping ending IP",
+        "description": "desc",
+        "startIp": "10.0.1.55",
+        "endIp": "10.0.1.60"
+    })
+    assert response.status_code == 400
+
+# test a new DHCP range that overlaps with an existing range
+def testNewDhcpRangeOverlappingIps():
+    response = client.post("/networks/1/dhcp/", json={
+        "name": "DHCP Test 2",
+        "startIp": "10.0.1.40",
+        "endIp": "10.0.1.65"
+    })
+
+    assert response.status_code == 400
+
+# make a DHCP range that we'll use later for searching
 def testNewDhcpRangeForOtherTests():
     response = client.post("/networks/1/dhcp/", json={
         "name": "DHCP Test 5",

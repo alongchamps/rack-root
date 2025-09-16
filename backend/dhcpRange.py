@@ -2,7 +2,7 @@ from fastapi import Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from .database import DhcpRange, Subnet, IpRecord, getDb
-from .iprecords import reserveIpRangeDhcp, clearIpAddress
+from .iprecords import reserveIpRangeDhcp, clearIpAddress, checkAllIPsAreAvailable
 from .validation_dhcpRange import DhcpCreate
 
 def readDhcpRangesBySubnet(subnetId: int, db: Session = Depends(getDb)):
@@ -32,6 +32,10 @@ def newDhcpRange(newDhcpRange:DhcpCreate, subnetId: int, db: Session = Depends(g
     except:
         raise HTTPException(status_code=400, detail="dhcpRange.newDhcpRange - Last IP address not found in the database")
     
+    # Make sure all IPs are listed as Available
+    # Exceptions will be directly thrown from IpRecords.checkAllIPsAreAvailable
+    checkAllIPsAreAvailable(subnetId=subnetId, ipAddressStartId=firstIp.id, ipAddressEndId=lastIp.id, db=db)
+    
     # make the record in the database
     try:
         newDhcpObject = DhcpRange(**newDhcpRange.model_dump(exclude_unset=True))
@@ -41,10 +45,10 @@ def newDhcpRange(newDhcpRange:DhcpCreate, subnetId: int, db: Session = Depends(g
         db.commit()
         db.refresh(newDhcpObject)
     except:
-        db.delete(newDhcpObject)
-        db.commit()
+        db.rollback()
         raise HTTPException(status_code=400, detail="dhcpRange.newDhcpRange - Issue creating the DHCP range record in the database")
 
+    # refresh objects
     firstIp2 = db.merge(firstIp)
     lastIp2 = db.merge(lastIp)
 
